@@ -1,0 +1,306 @@
+/* ============================================================
+   VARIABLES GLOBALES (Design Tokens)
+   ============================================================ */
+:root {
+  --color-bg:        #0f1117;
+  --color-surface:   #1a1d27;
+  --color-surface-2: #242838;
+  --color-border:    #2e3347;
+  --color-primary:   #6c63ff;
+  --color-primary-h: #8b84ff;
+  --color-danger:    #ff4d6d;
+  --color-danger-h:  #ff6b85;
+  --color-success:   #2dd4bf;
+  --color-text:      #e2e8f0;
+  --color-muted:     #8892a4;
+  --radius:          10px;
+  --shadow:          0 4px 24px rgba(0,0,0,0.4);
+  --transition:      0.2s ease;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+}
+
+h1, h2, h3 { font-weight: 700; }
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-brand {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.02em;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 0.5rem;
+  list-style: none;
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: var(--color-muted);
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  transition: color var(--transition), background var(--transition);
+}
+
+.navbar-links a:hover { color: var(--color-text); background: var(--color-surface-2); }
+.navbar-links a.active { color: var(--color-primary); background: rgba(108,99,255,0.12); }
+
+/* ============================================================
+   LAYOUT PRINCIPAL
+   ============================================================ */
+.main-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* Inicio temporal */
+.home-placeholder {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--color-muted);
+}
+.home-placeholder h1 { color: var(--color-text); margin-bottom: 1rem; }
+
+/* ============================================================
+   PAGE CONTAINER (cada módulo lo usa)
+   ============================================================ */
+.page-container { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-title { font-size: 1.75rem; }
+
+/* ============================================================
+   BUSCADOR
+   ============================================================ */
+.search-bar {
+  position: relative;
+  max-width: 400px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.6rem 0.9rem 0.6rem 2.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  transition: border-color var(--transition);
+}
+.search-input:focus { outline: none; border-color: var(--color-primary); }
+.search-input::placeholder { color: var(--color-muted); }
+
+/* ============================================================
+   ESTADOS (loading / error)
+   ============================================================ */
+.state-msg { color: var(--color-muted); font-style: italic; }
+.state-error { color: var(--color-danger); font-style: normal; font-weight: 500; }
+
+/* ============================================================
+   TABLA
+   ============================================================ */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  font-size: 0.95rem;
+}
+
+.data-table thead tr {
+  background: var(--color-surface-2);
+}
+
+.data-table th {
+  padding: 1rem 1.2rem;
+  text-align: left;
+  color: var(--color-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table td {
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.data-table tbody tr:hover { background: var(--color-surface-2); }
+
+.table-empty {
+  text-align: center;
+  color: var(--color-muted);
+  font-style: italic;
+  padding: 2rem !important;
+}
+
+.table-actions { display: flex; gap: 0.5rem; }
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--radius);
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), opacity var(--transition);
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn:not(:disabled):active { transform: scale(0.97); }
+
+.btn-primary  { background: var(--color-primary); color: #fff; }
+.btn-primary:not(:disabled):hover  { background: var(--color-primary-h); }
+
+.btn-secondary { background: var(--color-surface-2); color: var(--color-text); border: 1px solid var(--color-border); }
+.btn-secondary:not(:disabled):hover { background: var(--color-border); }
+
+.btn-icon { padding: 0.4rem; border-radius: 6px; background: transparent; }
+.btn-edit:hover   { background: rgba(108,99,255,0.15); color: var(--color-primary); }
+.btn-delete:hover { background: rgba(255,77,109,0.15); color: var(--color-danger); }
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.5);
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 520px;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-header h2 { font-size: 1.1rem; }
+
+/* ============================================================
+   FORMULARIO (dentro del modal)
+   ============================================================ */
+.modal-form { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; }
+
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.form-group label { font-size: 0.85rem; color: var(--color-muted); font-weight: 600; }
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 0.6rem 0.85rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  transition: border-color var(--transition);
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.form-group input.input-error,
+.form-group textarea.input-error {
+  border-color: var(--color-danger);
+}
+
+.error-msg { font-size: 0.8rem; color: var(--color-danger); }
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+  margin-top: 0.5rem;
+}
