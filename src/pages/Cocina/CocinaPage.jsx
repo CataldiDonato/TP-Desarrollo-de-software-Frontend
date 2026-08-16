@@ -1,7 +1,11 @@
+// Hooks: carga inicial, agrupamiento eficiente de pedidos y estados de interfaz.
 import { useEffect, useMemo, useState } from 'react';
+// Iconos que representan las transiciones y los mensajes del KDS.
 import { CheckCircle2, ChefHat, Clock3, Play, RefreshCw } from 'lucide-react';
-import { actualizarEstado, getPedidosActivos } from '../../../services/cocina.service';
+// Servicio que consume exclusivamente los endpoints de Cocina.
+import { actualizarEstado, getPedidosActivos } from '../../services/cocina.service';
 
+// Máquina de estados de la pantalla: traduce el enum técnico del backend a textos, estilos y acciones.
 const ESTADOS = {
   Pendiente: {
     etiqueta: 'No arrancado',
@@ -24,18 +28,24 @@ const ESTADOS = {
 };
 
 export default function CocinaPage() {
+  // Lista de detalles de comanda activos recibidos desde el backend.
   const [pedidos, setPedidos] = useState([]);
+  // Estados usados para comunicar el resultado de las operaciones al cocinero.
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
+  // El backend exige identificar al cocinero que cambia el estado del pedido.
   const [idCocinero, setIdCocinero] = useState('');
+  // Guarda la clave de la fila en proceso para deshabilitar solamente ese botón.
   const [actualizando, setActualizando] = useState(null);
 
+  // Carga los pedidos automáticamente una vez al entrar a Cocina.
   useEffect(() => {
     cargarPedidos();
   }, []);
 
   async function cargarPedidos() {
+    // Se limpia un error anterior antes de realizar una nueva consulta.
     setLoading(true);
     setError('');
 
@@ -49,6 +59,8 @@ export default function CocinaPage() {
     }
   }
 
+  // Agrupa los detalles por id de mesa para que el KDS los muestre como tarjetas independientes.
+  // useMemo evita recalcular el reduce si la lista pedidos no cambió.
   const pedidosPorMesa = useMemo(() => pedidos.reduce((mesas, pedido) => {
     const idMesa = pedido.comanda?.id_mesa ?? 'sin-mesa';
     if (!mesas[idMesa]) mesas[idMesa] = [];
@@ -57,22 +69,28 @@ export default function CocinaPage() {
   }, {}), [pedidos]);
 
   async function handleCambiarEstado(pedido) {
+    // Busca cómo debe comportarse la fila según su estado actual.
     const configuracion = ESTADOS[pedido.estado];
+    // Convierte el texto del input a número porque la API espera un ID numérico.
     const cocinero = Number(idCocinero);
 
+    // Un pedido finalizado no tiene ninguna transición posterior.
     if (!configuracion?.siguienteEstado) return;
 
+    // Validación local para evitar una llamada al backend con un cocinero inválido.
     if (!Number.isInteger(cocinero) || cocinero <= 0) {
       setFeedback('Ingresá un ID de cocinero válido antes de actualizar un pedido.');
       return;
     }
 
+    // La clave compuesta identifica de forma única un detalle de comanda.
     const pedidoKey = `${pedido.idComanda}-${pedido.idProducto}`;
     setActualizando(pedidoKey);
     setFeedback('');
     setError('');
 
     try {
+      // Envía IDs y el siguiente estado; el backend valida la transición nuevamente.
       await actualizarEstado({
         id_comanda: pedido.idComanda,
         id_producto: pedido.idProducto,
@@ -80,6 +98,7 @@ export default function CocinaPage() {
         id_cocinero: cocinero,
       });
 
+      // Se informa el éxito y se recarga para reflejar el estado persistido.
       setFeedback(`Pedido actualizado a “${ESTADOS[configuracion.siguienteEstado].etiqueta}”.`);
       await cargarPedidos();
     } catch (err) {
@@ -91,6 +110,7 @@ export default function CocinaPage() {
 
   return (
     <section className="page-container cocina-page">
+      {/* Título de la pantalla y recarga manual de los pedidos activos. */}
       <div className="page-header">
         <div>
           <h1 className="page-title">Cocina KDS</h1>
@@ -101,6 +121,7 @@ export default function CocinaPage() {
         </button>
       </div>
 
+      {/* El ID se solicita aquí porque cada cambio debe quedar asignado a un cocinero. */}
       <div className="kds-toolbar">
         <ChefHat size={22} />
         <label htmlFor="id-cocinero">ID del cocinero que opera</label>
@@ -114,10 +135,12 @@ export default function CocinaPage() {
         />
       </div>
 
+      {/* Estados informativos: carga, error y confirmación de actualización. */}
       {loading && <p className="state-msg">Cargando pedidos activos...</p>}
       {error && <p className="state-msg state-error">{error}</p>}
       {feedback && <p className="state-msg state-success">{feedback}</p>}
 
+      {/* Estado vacío cuando no hay detalles pendientes ni en preparación. */}
       {!loading && !error && pedidos.length === 0 && (
         <div className="kds-empty">
           <CheckCircle2 size={42} />
@@ -126,6 +149,7 @@ export default function CocinaPage() {
         </div>
       )}
 
+      {/* Una tarjeta por mesa; dentro se listan todos los productos de su comanda. */}
       {!loading && pedidos.length > 0 && (
         <div className="kds-grid">
           {Object.entries(pedidosPorMesa).map(([idMesa, pedidosMesa]) => (
@@ -147,6 +171,7 @@ export default function CocinaPage() {
                   </thead>
                   <tbody>
                     {pedidosMesa.map((pedido) => {
+                      // Se usa Pendiente como respaldo si llega un estado no contemplado.
                       const configuracion = ESTADOS[pedido.estado] || ESTADOS.Pendiente;
                       const IconoAccion = configuracion.icono || Clock3;
                       const pedidoKey = `${pedido.idComanda}-${pedido.idProducto}`;
@@ -158,6 +183,7 @@ export default function CocinaPage() {
                           <td>{pedido.cantidad}</td>
                           <td><span className={`kds-status ${configuracion.clase}`}>{configuracion.etiqueta}</span></td>
                           <td>
+                            {/* Solo los pedidos no finalizados conservan un botón de cambio de estado. */}
                             {configuracion.siguienteEstado ? (
                               <button
                                 className="btn btn-primary kds-action"
