@@ -8,8 +8,8 @@ import HomePage from '../pages/Home/HomePage';
 import UsuariosPage from '../pages/Usuarios/UsuariosPage';
 // Descomentar a medida que cada integrante cree su página:
 // import ReservasPage from '../pages/Reservas/ReservasPage';
-// import MesasPage from '../pages/Mesas/MesasPage';
-// import ComandasPage from '../pages/Comandas/ComandasPage';
+import ComandasPage from '../pages/Comandas/ComandasPage';
+import NuevaComandaPage from '../pages/Comandas/NuevaComandaPage';
 
 export default function AppRouter() {
   return (
@@ -21,7 +21,8 @@ export default function AppRouter() {
           <Route path="/productos" element={<ProductosPage />} />
           {/* <Route path="/reservas" element={<ReservasPage />} /> */}
           {/* <Route path="/mesas" element={<MesasPage />} /> */}
-          {/* <Route path="/comandas/*" element={<ComandasPage />} /> */}
+          <Route path="/comandas" element={<ComandasPage />} />
+          <Route path="/comandas/nueva" element={<NuevaComandaPage />} />
           <Route path="/cocina" element={<CocinaPage />} />
           <Route path="/usuarios" element={<UsuariosPage />} />
         </Routes>
