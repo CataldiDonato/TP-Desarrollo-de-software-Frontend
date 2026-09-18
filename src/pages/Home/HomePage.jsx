@@ -95,10 +95,10 @@ export default function HomePage() {
 
           <article className="dashboard-panel">
             <header className="dashboard-panel-header"><CalendarDays size={19} /><h2>Próximas reservas</h2></header>
-            {/* Cada reserva puede tener más de una mesa; por eso se unen sus IDs con coma. */}
+            {/* Se muestra la única mesa asignada a la reserva según el nuevo modelo de DB. */}
             {reservas.length ? (
               <div className="table-wrapper"><table className="data-table compact-table"><thead><tr><th>Cliente</th><th>Fecha</th><th>Mesa</th></tr></thead><tbody>
-                {reservas.map((reserva) => <tr key={reserva.id}><td><strong>{reserva.nombre_cliente}</strong></td><td>{fechaHora.format(new Date(reserva.fecha))}</td><td>{reserva.mesas?.length ? reserva.mesas.map((mesa) => mesa.id).join(', ') : 'A asignar'}</td></tr>)}
+                {reservas.map((reserva) => <tr key={reserva.id}><td><strong>{reserva.nombre_cliente}</strong></td><td>{fechaHora.format(new Date(reserva.fecha))}</td><td>{reserva.mesa ? reserva.mesa.id : 'A asignar'}</td></tr>)}
               </tbody></table></div>
             ) : <p className="panel-empty">No hay reservas confirmadas próximas.</p>}
           </article>
