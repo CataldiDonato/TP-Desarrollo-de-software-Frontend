@@ -53,33 +53,33 @@ const DetalleComandaModal = ({ comanda, onClose }) => {
     // DECISIÓN: Estilos inline para un overlay oscuro y centrado de modal.
     <div style={{
       position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-      backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+      backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center'
     }}>
-      <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', minWidth: '400px' }}>
+      <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: '20px', borderRadius: 'var(--radius)', minWidth: '400px' }}>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h3>Detalle Comanda - Mesa {comanda.id_mesa}</h3>
           {/* DECISIÓN: Botón para cerrar el modal usando icono X */}
-          <button onClick={onClose} style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}>
+          <button onClick={onClose} style={{ cursor: 'pointer', border: 'none', background: 'transparent', color: 'var(--color-text)' }}>
             <X size={24} />
           </button>
         </div>
 
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {detalles.map((item) => (
-            <li key={item.id_producto} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
+            <li key={item.id_producto} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', borderBottom: '1px solid var(--color-border)', paddingBottom: '10px' }}>
               <div>
                 <strong>{item.nombre_producto}</strong> <br/>
-                <small>Estado: {item.estado}</small>
+                <small style={{ color: 'var(--color-muted)' }}>Estado: {item.estado}</small>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 {/* Botones para modificar cantidad de items (Requerimiento de Hoja de Ruta) */}
-                <button onClick={() => modificarCantidad(item.id_producto, -1)}>-</button>
+                <button onClick={() => modificarCantidad(item.id_producto, -1)} style={{ padding: '2px 8px', background: 'var(--color-surface-2)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', cursor: 'pointer' }}>-</button>
                 <span>{item.cantidad}</span>
-                <button onClick={() => modificarCantidad(item.id_producto, 1)}>+</button>
+                <button onClick={() => modificarCantidad(item.id_producto, 1)} style={{ padding: '2px 8px', background: 'var(--color-surface-2)', color: 'var(--color-text)', border: '1px solid var(--color-border)', borderRadius: '4px', cursor: 'pointer' }}>+</button>
                 
                 {/* Botón para quitar producto */}
-                <button onClick={() => quitarProducto(item.id_producto)} style={{ color: 'red', cursor: 'pointer', border: 'none', background: 'transparent' }}>
+                <button onClick={() => quitarProducto(item.id_producto)} style={{ color: 'var(--color-danger)', cursor: 'pointer', border: 'none', background: 'transparent', marginLeft: '10px' }}>
                   <Trash2 size={18} />
                 </button>
               </div>
