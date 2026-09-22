@@ -3,8 +3,13 @@ import { getProductos, deleteProducto } from '../../services/productos.service'
 import ProductoFormModal from './ProductoFormModal'
 import { Pencil, Trash2, Plus, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useAuth } from '../../context/AuthContext'
 
 export default function ProductosPage() {
+  // Un Mozo puede ver el catálogo para armar pedidos, pero no crear/editar/eliminar productos.
+  const { usuario } = useAuth()
+  const soloLectura = usuario?.rol === 'Mozo'
+
   // ── Estado ──────────────────────────────────────────────────────────
   const [productos, setProductos] = useState([])       // lista completa
   const [loading, setLoading]     = useState(true)     // spinner inicial
@@ -74,9 +79,11 @@ export default function ProductosPage() {
       {/* Encabezado */}
       <div className="page-header">
         <h1 className="page-title">Productos</h1>
-        <button className="btn btn-primary" onClick={handleNuevo} id="btn-nuevo-producto">
-          <Plus size={18} /> Nuevo producto
-        </button>
+        {!soloLectura && (
+          <button className="btn btn-primary" onClick={handleNuevo} id="btn-nuevo-producto">
+            <Plus size={18} /> Nuevo producto
+          </button>
+        )}
       </div>
 
       {/* Buscador */}
@@ -106,13 +113,13 @@ export default function ProductosPage() {
                 <th>Descripción</th>
                 <th>Precio</th>
                 <th>Categoría</th>
-                <th>Acciones</th>
+                {!soloLectura && <th>Acciones</th>}
               </tr>
             </thead>
             <tbody>
               {productosFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="table-empty">
+                  <td colSpan={soloLectura ? 4 : 5} className="table-empty">
                     No hay productos para mostrar.
                   </td>
                 </tr>
@@ -123,24 +130,26 @@ export default function ProductosPage() {
                     <td>{p.descripcion ?? '—'}</td>
                     <td>${Number(p.precio).toFixed(2)}</td>
                     <td>{p.categoria ?? '—'}</td>
-                    <td className="table-actions">
-                      <button
-                        className="btn btn-icon btn-edit"
-                        onClick={() => handleEditar(p)}
-                        title="Editar"
-                        id={`btn-editar-${p._id ?? p.id}`}
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        className="btn btn-icon btn-delete"
-                        onClick={() => handleEliminar(p._id ?? p.id, p.nombre)}
-                        title="Eliminar"
-                        id={`btn-eliminar-${p._id ?? p.id}`}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
+                    {!soloLectura && (
+                      <td className="table-actions">
+                        <button
+                          className="btn btn-icon btn-edit"
+                          onClick={() => handleEditar(p)}
+                          title="Editar"
+                          id={`btn-editar-${p._id ?? p.id}`}
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          className="btn btn-icon btn-delete"
+                          onClick={() => handleEliminar(p._id ?? p.id, p.nombre)}
+                          title="Eliminar"
+                          id={`btn-eliminar-${p._id ?? p.id}`}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}

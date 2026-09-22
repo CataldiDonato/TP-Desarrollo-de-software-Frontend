@@ -1,32 +1,48 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Outlet } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
+import RutaProtegida from './RutaProtegida';
 
 // Vistas
+import LoginPage from '../pages/Login/LoginPage';
 import ProductosPage from '../pages/Productos/ProductosPage';
 import CocinaPage from '../pages/Cocina/CocinaPage';
 import HomePage from '../pages/Home/HomePage';
 import UsuariosPage from '../pages/Usuarios/UsuariosPage';
-// Descomentar a medida que cada integrante cree su página:
-// import ReservasPage from '../pages/Reservas/ReservasPage';
 import ComandasPage from '../pages/Comandas/ComandasPage';
 import NuevaComandaPage from '../pages/Comandas/NuevaComandaPage';
 
-export default function AppRouter() {
+function LayoutPrivado() {
   return (
     <>
       <Navbar />
       <main className="main-content">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/productos" element={<ProductosPage />} />
-          {/* <Route path="/reservas" element={<ReservasPage />} /> */}
-          {/* <Route path="/mesas" element={<MesasPage />} /> */}
-          <Route path="/comandas" element={<ComandasPage />} />
-          <Route path="/comandas/nueva" element={<NuevaComandaPage />} />
-          <Route path="/cocina" element={<CocinaPage />} />
-          <Route path="/usuarios" element={<UsuariosPage />} />
-        </Routes>
+        <Outlet />
       </main>
     </>
+  );
+}
+
+export default function AppRouter() {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+
+      <Route element={<LayoutPrivado />}>
+        <Route element={<RutaProtegida roles={['Administrador']} />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/usuarios" element={<UsuariosPage />} />
+        </Route>
+
+        <Route element={<RutaProtegida roles={['Administrador', 'Mozo']} />}>
+          <Route path="/comandas" element={<ComandasPage />} />
+          <Route path="/comandas/nueva" element={<NuevaComandaPage />} />
+          <Route path="/productos" element={<ProductosPage />} />
+        </Route>
+
+        <Route element={<RutaProtegida roles={['Administrador', 'Cocinero']} />}>
+          <Route path="/cocina" element={<CocinaPage />} />
+        </Route>
+      </Route>
+    </Routes>
   );
 }

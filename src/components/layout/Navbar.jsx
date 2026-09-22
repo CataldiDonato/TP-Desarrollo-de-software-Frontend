@@ -1,23 +1,50 @@
-import { NavLink } from 'react-router-dom';
+import { Fragment } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+
+const LINKS_POR_ROL = {
+  Administrador: [
+    { to: '/', label: 'Home' },
+    { to: '/comandas', label: 'Comandas' },
+    { to: '/cocina', label: 'Cocina KDS' },
+    { to: '/usuarios', label: 'Usuarios' },
+    { to: '/productos', label: 'Productos' },
+  ],
+  Mozo: [
+    { to: '/comandas', label: 'Comandas' },
+    { to: '/productos', label: 'Productos' },
+  ],
+  Cocinero: [
+    { to: '/cocina', label: 'Cocina KDS' },
+  ],
+};
 
 export default function Navbar() {
+  const { usuario, cerrarSesion } = useAuth();
+  const navigate = useNavigate();
+  const links = usuario ? LINKS_POR_ROL[usuario.rol] ?? [] : [];
+
+  function handleLogout() {
+    cerrarSesion();
+    navigate('/login');
+  }
+
   return (
     <nav className="navbar">
       <div className="nav-group">
-        <NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''}>Home</NavLink>
-        <span className="separator">|</span>
-        <NavLink to="/reservas" className={({ isActive }) => isActive ? 'active' : ''}>Reservas</NavLink>
-        <span className="separator">|</span>
-        <NavLink to="/mesas" className={({ isActive }) => isActive ? 'active' : ''}>Mesas</NavLink>
-        <span className="separator">|</span>
-        <NavLink to="/comandas" className={({ isActive }) => isActive ? 'active' : ''}>Comandas</NavLink>
+        {links.map(({ to, label }, i) => (
+          <Fragment key={to}>
+            {i > 0 && <span className="separator">|</span>}
+            <NavLink to={to} className={({ isActive }) => isActive ? 'active' : ''}>{label}</NavLink>
+          </Fragment>
+        ))}
       </div>
       <div className="nav-group">
-        <NavLink to="/cocina" className={({ isActive }) => isActive ? 'active' : ''}>Cocina KDS</NavLink>
-        <span className="separator">|</span>
-        <NavLink to="/usuarios" className={({ isActive }) => isActive ? 'active' : ''}>Usuarios</NavLink>
-        <span className="separator">|</span>
-        <NavLink to="/productos" className={({ isActive }) => isActive ? 'active' : ''}>Productos</NavLink>
+        {usuario && <span>{usuario.nombre} ({usuario.rol})</span>}
+        <button type="button" className="btn btn-secondary" onClick={handleLogout}>
+          <LogOut size={16} /> Salir
+        </button>
       </div>
     </nav>
   );
