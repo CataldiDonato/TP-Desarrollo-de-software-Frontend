@@ -3,8 +3,9 @@ import Navbar from '../components/layout/Navbar';
 
 // Vistas
 import ProductosPage from '../pages/Productos/ProductosPage';
+import CategoriasPage from '../pages/Productos/CategoriasPage';
 // Descomentar a medida que cada integrante cree su página:
-// import HomePage from '../pages/Home/HomePage';
+import HomePage from '../pages/Home/HomePage';
 // import ReservasPage from '../pages/Reservas/ReservasPage';
 // import MesasPage from '../pages/Mesas/MesasPage';
 // import ComandasPage from '../pages/Comandas/ComandasPage';
@@ -18,7 +19,8 @@ export default function AppRouter() {
       <main className="main-content">
         <Routes>
           <Route path="/productos" element={<ProductosPage />} />
-          {/* <Route path="/" element={<HomePage />} /> */}
+          <Route path="/categorias" element={<CategoriasPage />} />
+          <Route path="/" element={<HomePage />} />
           {/* <Route path="/reservas" element={<ReservasPage />} /> */}
           {/* <Route path="/mesas" element={<MesasPage />} /> */}
           {/* <Route path="/comandas/*" element={<ComandasPage />} /> */}
