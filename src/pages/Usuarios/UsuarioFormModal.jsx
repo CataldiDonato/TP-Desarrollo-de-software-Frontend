@@ -6,9 +6,8 @@ import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 // Servicios correspondientes a alta y edición de usuarios.
 import { createUsuario, updateUsuario } from '../../services/usuarios.service';
-
 // Valores permitidos por el enum rol_usuario del backend.
-const ROLES = ['Administrador', 'Cocinero', 'Mozo'];
+import { ROLES } from '../../models/modelos';
 
 // Valores iniciales cuando se abre el modal para crear un usuario nuevo.
 const formularioVacio = {

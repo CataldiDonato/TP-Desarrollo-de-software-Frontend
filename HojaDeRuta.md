@@ -1,11 +1,3 @@
-Aquí tienes la **Guía Unificada y Actualizada** para todo el equipo. 
-
-Unifica la arquitectura, las correcciones de carpetas (todo dentro de `src/`), la división de tareas por integrante, el flujo de Git y la explicación paso a paso del **patrón de CRUD** con los componentes listos para usar y replicar.
-
-Podés guardar este contenido en un archivo **`GUIA_FRONTEND.md`** dentro de la carpeta `Frontend/`.
-
----
-
 # 🚀 Guía Oficial de Desarrollo Frontend - RestoFlow (React + Vite)
 
 Documento oficial de arquitectura frontend, distribución de pantallas por integrante, estándar de código para CRUDs y flujo de Git para el equipo.

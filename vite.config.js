@@ -6,5 +6,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5000 // o el puerto que quieras
-  }
+  },
+  // Configuración de Vitest (tests unitarios). Los tests end-to-end están aparte, en e2e/.
+  test: {
+    environment: 'jsdom', // simula un navegador para poder renderizar componentes
+    include: ['src/**/*.test.{js,jsx}'],
+  },
 })

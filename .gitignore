@@ -26,3 +26,6 @@ lerna-debug.log*
 *.swp
 *.swo
 *~
+# Resultados de los tests e2e (Playwright)
+test-results/
+playwright-report/

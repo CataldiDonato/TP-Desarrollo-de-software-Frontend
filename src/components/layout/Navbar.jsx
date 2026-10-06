@@ -12,6 +12,8 @@ const LINKS_POR_ROL = {
     { to: '/cocina', label: 'Cocina KDS' },
     { to: '/usuarios', label: 'Usuarios' },
     { to: '/productos', label: 'Productos' },
+    { to: '/categorias', label: 'Categorías' },
+    { to: '/medios-pago', label: 'Medios de pago' },
   ],
   Mozo: [
     { to: '/mesas', label: 'Mesas' },
@@ -37,6 +39,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="nav-group">
+        <span className="navbar-brand">RestoFlow</span>
         {links.map(({ to, label }, i) => (
           <Fragment key={to}>
             {i > 0 && <span className="separator">|</span>}

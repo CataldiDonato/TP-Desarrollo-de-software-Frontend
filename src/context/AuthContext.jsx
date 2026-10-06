@@ -30,6 +30,9 @@ export function AuthProvider({ children }) {
   );
 }
 
+// Hook para leer la sesión desde cualquier componente: const { usuario } = useAuth();
+// (El comentario de abajo apaga un aviso de Vite que solo afecta la recarga en caliente al desarrollar.)
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

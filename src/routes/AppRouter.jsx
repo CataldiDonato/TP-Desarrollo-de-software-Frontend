@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet } from 'react-router-dom';
+import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import RutaProtegida from './RutaProtegida';
 
@@ -12,6 +12,8 @@ import ComandasPage from '../pages/Comandas/ComandasPage';
 import NuevaComandaPage from '../pages/Comandas/NuevaComandaPage';
 import MesasPage from '../pages/Mesas/MesasPage';
 import ReservasPage from '../pages/Reservas/ReservasPage';
+import CategoriasPage from '../pages/Categorias/CategoriasPage';
+import MediosPagoPage from '../pages/MediosPago/MediosPagoPage';
 
 function LayoutPrivado() {
   return (
@@ -33,6 +35,8 @@ export default function AppRouter() {
         <Route element={<RutaProtegida roles={['Administrador']} />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/usuarios" element={<UsuariosPage />} />
+          <Route path="/categorias" element={<CategoriasPage />} />
+          <Route path="/medios-pago" element={<MediosPagoPage />} />
         </Route>
 
         <Route element={<RutaProtegida roles={['Administrador', 'Mozo']} />}>
@@ -47,6 +51,9 @@ export default function AppRouter() {
           <Route path="/cocina" element={<CocinaPage />} />
         </Route>
       </Route>
+
+      {/* Cualquier otra dirección vuelve al inicio (RutaProtegida decide a dónde según el rol) */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

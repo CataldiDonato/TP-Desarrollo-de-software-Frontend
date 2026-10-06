@@ -17,5 +17,16 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // Estas dos reglas son del React Compiler (que no usamos) y marcan como error el patrón
+      // clásico "useEffect(() => { cargarDatos() }, [])" que usamos en todas las pantallas.
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/immutability': 'off',
+    },
+  },
+  {
+    // Los tests e2e y la config de Playwright corren en Node, no en el navegador.
+    files: ['e2e/**/*.js', 'playwright.config.js'],
+    languageOptions: { globals: globals.node },
   },
 ])

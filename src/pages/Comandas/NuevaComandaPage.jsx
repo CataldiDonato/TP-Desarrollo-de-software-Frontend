@@ -1,164 +1,168 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { createComanda } from '../../services/comandas.service';
+import { getMesas } from '../../services/mesas.service';
+import { getProductos } from '../../services/productos.service';
+import { formatearPrecio, mensajeDeError } from '../../utils/formato';
 
+// Apertura de mesa: el mozo elige la mesa, carga los productos y los envía a la cocina.
 const NuevaComandaPage = () => {
-  const [mesa, setMesa] = useState('');
-  // Productos disponibles para el Select
+  const navigate = useNavigate();
+
+  // Datos que vienen del backend para los desplegables
+  const [mesas, setMesas] = useState([]);
   const [productosDisponibles, setProductosDisponibles] = useState([]);
-  
-  // Estado para el formulario de Cargar Producto
+
+  // Formulario
+  const [mesa, setMesa] = useState('');
   const [productoSeleccionado, setProductoSeleccionado] = useState('');
   const [cantidad, setCantidad] = useState(1);
-  
-  // Listado temporal derecho acumulativo antes de confirmar el envío
+
+  // Listado temporal de productos antes de confirmar el envío
   const [itemsTemporal, setItemsTemporal] = useState([]);
+  const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
-    cargarProductos();
+    cargarDatos();
   }, []);
 
-  const cargarProductos = async () => {
-    /* INCOMPLETO / SOLUCIÓN: La ruta de productos.routes.ts está comentada en backend.
-       No podemos hacer GET /api/productos.
-       Solución por ahora: Inyectamos un arreglo de productos mockeados (Hardcodeados).
-       Cuando el backend lo resuelva, se borra el mock y se usa el servicio 'getProductos()' */
-    setProductosDisponibles([
-      { id: 1, nombre: 'Pizza Margarita', precio: 12000 },
-      { id: 2, nombre: 'Hamburguesa Completa', precio: 8500 },
-      { id: 3, nombre: 'Cerveza Artesanal', precio: 3000 }
-    ]);
-  };
+  async function cargarDatos() {
+    try {
+      const [resMesas, resProductos] = await Promise.all([getMesas(), getProductos()]);
+      // Una mesa ocupada ya tiene comanda abierta, así que no se puede elegir.
+      setMesas(resMesas.data.filter((m) => m.estado !== 'Ocupada'));
+      setProductosDisponibles(resProductos.data);
+    } catch (error) {
+      toast.error(mensajeDeError(error, 'No se pudieron cargar las mesas y productos'));
+    }
+  }
 
-  const agregarAlListado = (e) => {
+  function agregarAlListado(e) {
     e.preventDefault();
-    if (!productoSeleccionado || cantidad < 1) return;
+    if (!productoSeleccionado || Number(cantidad) < 1) return;
 
-    // DECISIÓN: Busco los datos del producto seleccionado para mostrarlos en el listado temporal.
-    const productoInfo = productosDisponibles.find(p => p.id === parseInt(productoSeleccionado));
-    
-    // Verificamos si ya existe en la lista temporal para sumar la cantidad
+    // Busco los datos del producto seleccionado para mostrarlos en el listado temporal.
+    const productoInfo = productosDisponibles.find(p => p.id === Number(productoSeleccionado));
+
+    // Si ya estaba en la lista, se suma la cantidad en vez de repetirlo.
     const existe = itemsTemporal.find(item => item.id === productoInfo.id);
     if (existe) {
-      setItemsTemporal(itemsTemporal.map(item => 
-        item.id === productoInfo.id ? { ...item, cantidad: item.cantidad + parseInt(cantidad) } : item
+      setItemsTemporal(itemsTemporal.map(item =>
+        item.id === productoInfo.id ? { ...item, cantidad: item.cantidad + Number(cantidad) } : item
       ));
     } else {
-      setItemsTemporal([...itemsTemporal, { ...productoInfo, cantidad: parseInt(cantidad) }]);
+      setItemsTemporal([...itemsTemporal, { ...productoInfo, cantidad: Number(cantidad) }]);
     }
-    
+
     // Reseteamos el formulario de producto
     setProductoSeleccionado('');
     setCantidad(1);
-  };
+  }
 
-  const confirmarEnvio = async () => {
-    if (!mesa) return alert('Por favor, ingrese el número de mesa');
-    if (itemsTemporal.length === 0) return alert('Debe cargar al menos un producto');
+  function quitarDelListado(id) {
+    setItemsTemporal(itemsTemporal.filter(item => item.id !== id));
+  }
 
-    try {
-      /* INCOMPLETO / SOLUCIÓN: El schema pide 'id_mozo' y 'id_mesa'. Como no hay Login/Sesión todavía, 
-         hardcodeamos 'id_mozo: 1'. 
-         Además, el backend actual POST /api/comandas solo crea la comanda, NO procesa el arreglo de detalles 
-         ni los inserta juntos en la DB. 
-         Solución Futura: Modificar el controller en Backend para que reciba 'detalles' en el body y use 
-         una transacción Prisma (prisma.comanda.create({ data: { ..., detalles_comandas: { create: [...] } } })). 
-         Por ahora, enviamos el POST y vaciamos la lista asumiendo éxito. */
-
-      const data = {
-        fecha: new Date().toISOString(),
-        id_mesa: parseInt(mesa),
-        id_mozo: 1, 
-        // Enviaríamos itemsTemporal al backend aquí
-        detalles: itemsTemporal.map(item => ({ id_producto: item.id, cantidad: item.cantidad }))
-      };
-
-      await createComanda(data);
-      alert('Comanda creada con éxito!');
-      
-      // Limpiamos la pantalla
-      setMesa('');
-      setItemsTemporal([]);
-    } catch (error) {
-      console.error('Error al enviar la comanda:', error);
-      alert('Error al crear la comanda');
+  async function confirmarEnvio() {
+    if (!mesa) {
+      toast.error('Elegí la mesa');
+      return;
     }
-  };
+    if (itemsTemporal.length === 0) {
+      toast.error('Cargá al menos un producto');
+      return;
+    }
+
+    setEnviando(true);
+    try {
+      // El mozo no se manda: el backend lo toma del usuario logueado.
+      await createComanda({
+        id_mesa: Number(mesa),
+        detalles: itemsTemporal.map(item => ({ id_producto: item.id, cantidad: item.cantidad }))
+      });
+      toast.success(`Comanda de la mesa ${mesa} enviada a cocina`);
+      navigate('/comandas');
+    } catch (error) {
+      toast.error(mensajeDeError(error, 'Error al crear la comanda'));
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  const total = itemsTemporal.reduce((suma, item) => suma + (item.precio ?? 0) * item.cantidad, 0);
 
   return (
-    // DECISIÓN: Layout dividido en 2 columnas (Izquierda Formulario, Derecha Listado) como sugiere "Listado temporal derecho"
-    <div style={{ display: 'flex', gap: '40px', padding: '20px' }}>
-      
-      {/* Columna Izquierda */}
-      <div style={{ flex: 1 }}>
-        <h2>Apertura de Comanda</h2>
-        
-        <div style={{ marginBottom: '20px' }}>
-          <label>Número de mesa: </label>
-          <input 
-            type="number" 
-            value={mesa} 
-            onChange={(e) => setMesa(e.target.value)} 
-            style={{ padding: '5px' }}
-          />
-        </div>
+    <div className="page-container">
+      <h1 className="page-title">Nueva comanda</h1>
 
-        <form onSubmit={agregarAlListado} style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px' }}>
-          <h3>Cargar Producto</h3>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <select 
-              value={productoSeleccionado} 
-              onChange={(e) => setProductoSeleccionado(e.target.value)}
-              style={{ padding: '5px', flex: 1 }}
-            >
-              <option value="">Seleccione un producto...</option>
-              {productosDisponibles.map(prod => (
-                <option key={prod.id} value={prod.id}>{prod.nombre}</option>
+      {/* Dos columnas en pantallas grandes: formulario a la izquierda, listado a la derecha */}
+      <div className="dos-columnas">
+        <div className="panel">
+          <div className="form-group">
+            <label htmlFor="comanda-mesa">Mesa *</label>
+            <select id="comanda-mesa" value={mesa} onChange={(e) => setMesa(e.target.value)}>
+              <option value="">-- Elegir mesa --</option>
+              {mesas.map(m => (
+                <option key={m.id} value={m.id}>Mesa {m.id} ({m.capacidad} personas){m.estado === 'Reservada' ? ' - Reservada' : ''}</option>
               ))}
             </select>
-            
-            <input 
-              type="number" 
-              min="1" 
-              value={cantidad} 
-              onChange={(e) => setCantidad(e.target.value)}
-              style={{ width: '60px', padding: '5px' }}
-            />
-            
-            {/* DECISIÓN: Botón "+" como especifica la hoja de ruta */}
-            <button type="submit" style={{ padding: '5px 15px', cursor: 'pointer' }}>
-              +
-            </button>
           </div>
-        </form>
-      </div>
 
-      {/* Columna Derecha (Listado temporal acumulativo) */}
-      <div style={{ flex: 1, borderLeft: '1px solid #eee', paddingLeft: '40px' }}>
-        <h3>Listado Temporal</h3>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {itemsTemporal.map((item, index) => (
-            <li key={index} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>{item.cantidad}x {item.nombre}</span>
-              <span>${item.precio * item.cantidad}</span>
-            </li>
-          ))}
-        </ul>
-        
-        {itemsTemporal.length > 0 && (
-          <div style={{ marginTop: '20px', borderTop: '2px solid #000', paddingTop: '10px' }}>
-            <button 
-              onClick={confirmarEnvio}
-              style={{ padding: '10px 20px', backgroundColor: 'green', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', width: '100%' }}
-            >
-              Confirmar y Enviar a Cocina
-            </button>
-          </div>
-        )}
-      </div>
+          <form onSubmit={agregarAlListado} className="form-group">
+            <label htmlFor="comanda-producto">Cargar producto</label>
+            <div className="input-con-boton">
+              <select id="comanda-producto" value={productoSeleccionado} onChange={(e) => setProductoSeleccionado(e.target.value)}>
+                <option value="">Seleccione un producto...</option>
+                {productosDisponibles.map(prod => (
+                  <option key={prod.id} value={prod.id}>{prod.nombre} - {formatearPrecio(prod.precio)}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                min="1"
+                value={cantidad}
+                onChange={(e) => setCantidad(e.target.value)}
+                className="input-cantidad"
+                aria-label="Cantidad"
+              />
+              <button type="submit" className="btn btn-secondary" title="Agregar">
+                <Plus size={16} />
+              </button>
+            </div>
+          </form>
+        </div>
 
+        <div className="panel">
+          <h2 className="panel-title">Productos a enviar</h2>
+          {itemsTemporal.length === 0 ? (
+            <p className="text-muted">Todavía no cargaste productos.</p>
+          ) : (
+            <ul className="lista-simple">
+              {itemsTemporal.map(item => (
+                <li key={item.id} className="item-lista">
+                  <span>{item.cantidad} x {item.nombre}</span>
+                  <span>
+                    {formatearPrecio((item.precio ?? 0) * item.cantidad)}
+                    <button className="btn btn-icon btn-delete" onClick={() => quitarDelListado(item.id)} title="Quitar">
+                      <Trash2 size={16} />
+                    </button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <p className="total"><span>Total</span><strong>{formatearPrecio(total)}</strong></p>
+
+          <button className="btn btn-primary btn-block" onClick={confirmarEnvio} disabled={enviando || itemsTemporal.length === 0}>
+            {enviando ? 'Enviando...' : 'Confirmar y enviar a cocina'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default NuevaComandaPage;
-

@@ -1,9 +1,14 @@
 // Hooks: carga inicial, agrupamiento eficiente de pedidos y estados de interfaz.
 import { useEffect, useMemo, useState } from 'react';
 // Iconos que representan las transiciones y los mensajes del KDS.
-import { CheckCircle2, ChefHat, Clock3, Play, RefreshCw } from 'lucide-react';
+import { CheckCircle2, Clock3, Play, RefreshCw } from 'lucide-react';
 // Servicio que consume exclusivamente los endpoints de Cocina.
 import { actualizarEstado, getPedidosActivos } from '../../services/cocina.service';
+// Datos del usuario logueado: solo un Cocinero puede cambiar el estado de los platos.
+import { useAuth } from '../../context/AuthContext';
+
+// Cada cuántos milisegundos se vuelven a pedir los pedidos (polling).
+const INTERVALO_ACTUALIZACION = 15000;
 
 // Máquina de estados de la pantalla: traduce el enum técnico del backend a textos, estilos y acciones.
 const ESTADOS = {
@@ -28,20 +33,24 @@ const ESTADOS = {
 };
 
 export default function CocinaPage() {
+  // El Administrador puede mirar la pantalla, pero los botones son solo para el Cocinero.
+  const { usuario } = useAuth();
+  const esCocinero = usuario?.rol === 'Cocinero';
   // Lista de detalles de comanda activos recibidos desde el backend.
   const [pedidos, setPedidos] = useState([]);
   // Estados usados para comunicar el resultado de las operaciones al cocinero.
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
-  // El backend exige identificar al cocinero que cambia el estado del pedido.
-  const [idCocinero, setIdCocinero] = useState('');
   // Guarda la clave de la fila en proceso para deshabilitar solamente ese botón.
   const [actualizando, setActualizando] = useState(null);
 
-  // Carga los pedidos automáticamente una vez al entrar a Cocina.
+  // Carga los pedidos al entrar a Cocina y después cada 15 segundos, para ver los pedidos nuevos.
+  // La función que devuelve el useEffect se ejecuta al salir de la pantalla y frena el intervalo.
   useEffect(() => {
     cargarPedidos();
+    const intervalo = setInterval(cargarPedidos, INTERVALO_ACTUALIZACION);
+    return () => clearInterval(intervalo);
   }, []);
 
   async function cargarPedidos() {
@@ -71,17 +80,9 @@ export default function CocinaPage() {
   async function handleCambiarEstado(pedido) {
     // Busca cómo debe comportarse la fila según su estado actual.
     const configuracion = ESTADOS[pedido.estado];
-    // Convierte el texto del input a número porque la API espera un ID numérico.
-    const cocinero = Number(idCocinero);
 
     // Un pedido finalizado no tiene ninguna transición posterior.
     if (!configuracion?.siguienteEstado) return;
-
-    // Validación local para evitar una llamada al backend con un cocinero inválido.
-    if (!Number.isInteger(cocinero) || cocinero <= 0) {
-      setFeedback('Ingresá un ID de cocinero válido antes de actualizar un pedido.');
-      return;
-    }
 
     // La clave compuesta identifica de forma única un detalle de comanda.
     const pedidoKey = `${pedido.idComanda}-${pedido.idProducto}`;
@@ -91,11 +92,11 @@ export default function CocinaPage() {
 
     try {
       // Envía IDs y el siguiente estado; el backend valida la transición nuevamente.
+      // El cocinero no se manda: el backend lo toma del usuario logueado (token).
       await actualizarEstado({
         id_comanda: pedido.idComanda,
         id_producto: pedido.idProducto,
         estado: configuracion.siguienteEstado,
-        id_cocinero: cocinero,
       });
 
       // Se informa el éxito y se recarga para reflejar el estado persistido.
@@ -121,22 +122,8 @@ export default function CocinaPage() {
         </button>
       </div>
 
-      {/* El ID se solicita aquí porque cada cambio debe quedar asignado a un cocinero. */}
-      <div className="kds-toolbar">
-        <ChefHat size={22} />
-        <label htmlFor="id-cocinero">ID del cocinero que opera</label>
-        <input
-          id="id-cocinero"
-          type="number"
-          min="1"
-          placeholder="Ej: 3"
-          value={idCocinero}
-          onChange={(event) => setIdCocinero(event.target.value)}
-        />
-      </div>
-
       {/* Estados informativos: carga, error y confirmación de actualización. */}
-      {loading && <p className="state-msg">Cargando pedidos activos...</p>}
+      {loading && pedidos.length === 0 && <p className="state-msg">Cargando pedidos activos...</p>}
       {error && <p className="state-msg state-error">{error}</p>}
       {feedback && <p className="state-msg state-success">{feedback}</p>}
 
@@ -150,7 +137,7 @@ export default function CocinaPage() {
       )}
 
       {/* Una tarjeta por mesa; dentro se listan todos los productos de su comanda. */}
-      {!loading && pedidos.length > 0 && (
+      {pedidos.length > 0 && (
         <div className="kds-grid">
           {Object.entries(pedidosPorMesa).map(([idMesa, pedidosMesa]) => (
             <article className="kds-mesa-card" key={idMesa}>
@@ -184,7 +171,9 @@ export default function CocinaPage() {
                           <td><span className={`kds-status ${configuracion.clase}`}>{configuracion.etiqueta}</span></td>
                           <td>
                             {/* Solo los pedidos no finalizados conservan un botón de cambio de estado. */}
-                            {configuracion.siguienteEstado ? (
+                            {!esCocinero ? (
+                              <span className="text-muted">Solo el cocinero</span>
+                            ) : configuracion.siguienteEstado ? (
                               <button
                                 className="btn btn-primary kds-action"
                                 type="button"

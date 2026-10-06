@@ -15,10 +15,13 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Si el token venció o es inválido (401), se cierra la sesión y se vuelve al login.
+// Se excluye el propio login: ahí un 401 significa "contraseña incorrecta" y se muestra el mensaje.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const esLogin = error.config?.url === '/auth/login';
+    if (error.response?.status === 401 && !esLogin) {
       localStorage.removeItem('token');
       localStorage.removeItem('usuario');
       window.location.href = '/login';

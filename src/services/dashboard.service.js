@@ -3,5 +3,5 @@ import api from './api';
 
 // GET /dashboard/stats: devuelve las métricas agregadas que alimentan las tarjetas de Home.
 export const getDashboardStats = () => api.get('/dashboard/stats');
-// GET /comandas: Home filtra las comandas Abiertas para mostrar las mesas activas.
-export const getMesasActivas = () => api.get('/comandas');
+// GET /comandas?estado=Abierta: las comandas abiertas son las mesas activas.
+export const getMesasActivas = () => api.get('/comandas', { params: { estado: 'Abierta' } });

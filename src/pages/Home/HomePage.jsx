@@ -30,8 +30,8 @@ export default function HomePage() {
     try {
       const [respuesta, respuestaComandas] = await Promise.all([getDashboardStats(), getMesasActivas()]);
       setEstadisticas(respuesta.data);
-      // Una mesa está activa si posee una comanda cuyo estado continúa Abierta.
-      setMesasActivas(respuestaComandas.data.filter((comanda) => comanda.estado === 'Abierta'));
+      // El backend ya devuelve solo las comandas Abiertas: cada una es una mesa activa.
+      setMesasActivas(respuestaComandas.data);
     } catch (err) {
       // Se prioriza el mensaje del backend, pero se mantiene uno genérico como respaldo.
       setError(err.response?.data?.message || 'No se pudo cargar el dashboard.');

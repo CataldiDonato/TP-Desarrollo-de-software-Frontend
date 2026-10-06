@@ -1,101 +1,99 @@
-import React, { useState, useEffect } from 'react';
-import { getComandas } from '../../services/comandas.service';
-// DECISIÓN: Usamos lucide-react para los íconos de forma consistente con el proyecto.
-import { Eye } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, Plus } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { getComandas } from '../../services/comandas.service';
+import { ESTADOS_COMANDA } from '../../models/modelos';
+import { formatearFecha, formatearPrecio, mensajeDeError } from '../../utils/formato';
 import DetalleComandaModal from './DetalleComandaModal';
 
 const ComandasPage = () => {
   const navigate = useNavigate();
-  // Estado para guardar las comandas obtenidas del backend
+  // Comandas obtenidas del backend
   const [comandas, setComandas] = useState([]);
-  // Estado para manejar qué comanda se abre en el modal de detalles
+  const [cargando, setCargando] = useState(true);
+  // Por defecto se muestran las abiertas, que son las que el mozo está atendiendo
+  const [filtroEstado, setFiltroEstado] = useState('Abierta');
+  // Id de la comanda que se abre en el modal de detalle
   const [comandaSeleccionada, setComandaSeleccionada] = useState(null);
 
+  // Se vuelve a pedir el listado cada vez que cambia el filtro (el backend filtra por estado).
   useEffect(() => {
-    cargarComandas();
-  }, []);
+    cargarComandas(filtroEstado);
+  }, [filtroEstado]);
 
-  const cargarComandas = async () => {
+  async function cargarComandas(estado) {
+    setCargando(true);
     try {
-      // DECISIÓN: Consumimos el endpoint real GET /api/comandas.
-      const response = await getComandas();
+      const response = await getComandas(estado || undefined);
       setComandas(response.data);
     } catch (error) {
-      console.error('Error al obtener comandas:', error);
-      /* INCOMPLETO / SOLUCIÓN: Si el backend falla porque no está levantado o la base de datos está vacía, 
-         la pantalla quedaría en blanco. La solución ideal aquí es interceptar el error e inyectar un array mockeado 
-         temporalmente con 'setComandas(mockData)' y además mostrar un toast de error (react-hot-toast) avisando que se usan datos locales. */
+      toast.error(mensajeDeError(error, 'Error al obtener las comandas'));
+    } finally {
+      setCargando(false);
     }
-  };
+  }
 
   return (
-    <div style={{ padding: '20px' }}>
-      {/* DECISIÓN: Agregué estilos en línea básicos para asegurar que se vea estructurado, 
-          ya que no vi Tailwind en el package.json, asumo que manejan estilos por index.css. */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Listado de Comandas</h2>
-        {/* DECISIÓN: Botón para navegar a la página de Nueva Comanda */}
-        <button 
-          onClick={() => navigate('/comandas/nueva')}
-          style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          + Nueva Comanda
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">Comandas</h1>
+        <button className="btn btn-primary" onClick={() => navigate('/comandas/nueva')}>
+          <Plus size={18} /> Nueva comanda
         </button>
       </div>
-      
-      <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid #ccc' }}>
-            <th>Mesa</th>
-            <th>Mozo</th>
-            <th>Método Pago</th>
-            <th>Total</th>
-            <th>Fecha</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {comandas.length > 0 ? (
-            comandas.map((comanda) => (
-              <tr key={comanda.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td>{comanda.id_mesa}</td>
-                {/* INCOMPLETO / SOLUCIÓN: El backend (según schema.prisma) solo devuelve 'id_mozo' y 'id_medio_pago', no el nombre string. 
-                    Solución: Cuando los endpoints de Usuarios y Medios de pago estén listos, deberíamos hacer un GET a esos endpoints 
-                    y cruzar la información en el frontend, o bien pedirle al encargado del Backend que haga un JOIN en el GET /comandas 
-                    y nos mande 'nombre_mozo' y 'tipo_medio_pago'. Por ahora muestro el ID. */}
-                <td>{comanda.id_mozo || 'N/A'}</td>
-                <td>{comanda.id_medio_pago || '-'}</td>
-                <td>$ {comanda.total || 0 /* El total debe calcularse iterando el detalle_comanda, que ahora no viene en el backend */}</td>
-                <td>{new Date(comanda.fecha).toLocaleDateString()}</td>
-                <td>{comanda.estado}</td>
-                <td>
-                  {/* DECISIÓN: El botón abre el modal, sin navegar a otra página. Esto hace que sea más fluido para el mozo. */}
-                  <button 
-                    onClick={() => setComandaSeleccionada(comanda)}
-                    style={{ padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
-                  >
-                    <Eye size={16} /> VER DETALLES
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
-                No hay comandas activas
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
 
-      {/* Renderizado condicional del Modal de Detalles */}
+      <div className="filter-bar">
+        <select className="filter-select" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+          <option value="">Todas</option>
+          {ESTADOS_COMANDA.map((estado) => <option key={estado} value={estado}>{estado}s</option>)}
+        </select>
+      </div>
+
+      {cargando ? (
+        <p className="state-msg">Cargando comandas...</p>
+      ) : (
+        <div className="table-wrapper">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Mesa</th>
+                <th>Mozo</th>
+                <th>Medio de pago</th>
+                <th>Total</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comandas.length === 0 ? (
+                <tr><td colSpan="7" className="table-empty">No hay comandas para mostrar.</td></tr>
+              ) : comandas.map((comanda) => (
+                <tr key={comanda.id}>
+                  <td><strong>Mesa {comanda.id_mesa}</strong></td>
+                  <td>{comanda.mozo.nombre}</td>
+                  <td>{comanda.medio_pago ? comanda.medio_pago.tipo : '—'}</td>
+                  <td>{formatearPrecio(comanda.total)}</td>
+                  <td>{formatearFecha(comanda.fecha)}</td>
+                  <td><span className={`badge estado-${comanda.estado.toLowerCase()}`}>{comanda.estado}</span></td>
+                  <td>
+                    <button className="btn btn-secondary" onClick={() => setComandaSeleccionada(comanda.id)}>
+                      <Eye size={16} /> Ver detalle
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {comandaSeleccionada && (
-        <DetalleComandaModal 
-          comanda={comandaSeleccionada} 
-          onClose={() => setComandaSeleccionada(null)} 
+        <DetalleComandaModal
+          idComanda={comandaSeleccionada}
+          onCerrar={() => setComandaSeleccionada(null)}
+          onCambio={() => cargarComandas(filtroEstado)}
         />
       )}
     </div>
