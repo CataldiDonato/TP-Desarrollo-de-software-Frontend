@@ -10,6 +10,8 @@ import HomePage from '../pages/Home/HomePage';
 import UsuariosPage from '../pages/Usuarios/UsuariosPage';
 import ComandasPage from '../pages/Comandas/ComandasPage';
 import NuevaComandaPage from '../pages/Comandas/NuevaComandaPage';
+import MesasPage from '../pages/Mesas/MesasPage';
+import ReservasPage from '../pages/Reservas/ReservasPage';
 
 function LayoutPrivado() {
   return (
@@ -34,6 +36,8 @@ export default function AppRouter() {
         </Route>
 
         <Route element={<RutaProtegida roles={['Administrador', 'Mozo']} />}>
+          <Route path="/mesas" element={<MesasPage />} />
+          <Route path="/reservas" element={<ReservasPage />} />
           <Route path="/comandas" element={<ComandasPage />} />
           <Route path="/comandas/nueva" element={<NuevaComandaPage />} />
           <Route path="/productos" element={<ProductosPage />} />

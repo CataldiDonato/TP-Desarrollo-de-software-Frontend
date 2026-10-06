@@ -6,12 +6,16 @@ import { useAuth } from '../../context/AuthContext';
 const LINKS_POR_ROL = {
   Administrador: [
     { to: '/', label: 'Home' },
+    { to: '/mesas', label: 'Mesas' },
+    { to: '/reservas', label: 'Reservas' },
     { to: '/comandas', label: 'Comandas' },
     { to: '/cocina', label: 'Cocina KDS' },
     { to: '/usuarios', label: 'Usuarios' },
     { to: '/productos', label: 'Productos' },
   ],
   Mozo: [
+    { to: '/mesas', label: 'Mesas' },
+    { to: '/reservas', label: 'Reservas' },
     { to: '/comandas', label: 'Comandas' },
     { to: '/productos', label: 'Productos' },
   ],
