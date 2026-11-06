@@ -69,7 +69,7 @@ Evidencia de la última ejecución: [docs/evidencia-tests.md](docs/evidencia-tes
 | Mesas (ver, filtrar, detalle) | ✔ | ✔ | |
 | Mesas (crear, editar, borrar) | ✔ | | |
 | Reservas | ✔ | ✔ | |
-| Comandas (abrir, agregar productos, cobrar) | ✔ | ✔ | |
+| Comandas (abrir, agregar productos, cobrar; también con QR de Mercado Pago) | ✔ | ✔ | |
 | Productos (ver, detalle con historial de precios) | ✔ | ✔ | |
 | Productos (crear, editar, borrar) | ✔ | | |
 | Categorías, Medios de pago, Usuarios | ✔ | | |
@@ -77,6 +77,18 @@ Evidencia de la última ejecución: [docs/evidencia-tests.md](docs/evidencia-tes
 | Cocina KDS (cambiar estado de platos) | | | ✔ |
 
 Las rutas están protegidas por rol en `src/routes/AppRouter.jsx` (componente `RutaProtegida`). El backend vuelve a controlar los permisos en cada pedido.
+
+La única ruta pública además del login es `/pago/resultado`: ahí vuelve el cliente desde Mercado Pago después de pagar. Solo muestra un mensaje; la comanda la cierra el backend.
+
+## Cobro con Mercado Pago (QR)
+
+En el detalle de una comanda abierta, **Cobrar con Mercado Pago (QR)** abre `PagoQrModal`:
+
+1. Pide al backend el link de pago (`POST /comandas/:id/mercadopago`) y lo muestra como QR (`qrcode.react`).
+2. El cliente lo escanea y paga desde el celular.
+3. El modal consulta la comanda cada 3 segundos y, cuando el backend la marca como `Pagada` (por el webhook de MP), avisa y se cierra.
+
+Si se agregan o quitan productos, hay que cerrar el modal y generar un QR nuevo. El medio `MercadoPago` no aparece en el cobro manual. Configuración y pruebas: [`Backend/docs/MERCADOPAGO.md`](../Backend/docs/MERCADOPAGO.md).
 
 ## Estructura
 
