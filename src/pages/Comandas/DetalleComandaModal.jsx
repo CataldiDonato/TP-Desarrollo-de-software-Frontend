@@ -7,6 +7,7 @@ import { agregarDetalle, cambiarCantidadDetalle, quitarDetalle } from '../../ser
 import { getProductos } from '../../services/productos.service';
 import { getMediosPago } from '../../services/mediosPago.service';
 import { formatearFecha, formatearPrecio, mensajeDeError } from '../../utils/formato';
+import PagoQrModal from './PagoQrModal';
 
 /**
  * Detalle de una comanda. Si está abierta, el mozo puede:
@@ -29,6 +30,7 @@ const DetalleComandaModal = ({ idComanda, onCerrar, onCambio }) => {
   // Medio de pago elegido para cobrar
   const [medioPago, setMedioPago] = useState('');
   const [procesando, setProcesando] = useState(false);
+  const [mostrarQr, setMostrarQr] = useState(false);
 
   useEffect(() => {
     cargarDatos(idComanda);
@@ -125,6 +127,7 @@ const DetalleComandaModal = ({ idComanda, onCerrar, onCambio }) => {
   const estaAbierta = comanda.estaAbierta;
 
   return (
+    <>
     <Modal titulo={`Comanda #${comanda.id} - Mesa ${comanda.id_mesa}`} onCerrar={onCerrar}>
       <div className="modal-body">
         <p className="text-muted">
@@ -218,18 +221,27 @@ const DetalleComandaModal = ({ idComanda, onCerrar, onCambio }) => {
               />
             </form>
 
-            {/* Cobrar o cancelar */}
+            {/* Cobrar */}
             <div className="form-group">
               <label htmlFor="detalle-medio">Cobrar la cuenta</label>
               <div className="input-con-boton">
                 <select id="detalle-medio" value={medioPago} onChange={(e) => setMedioPago(e.target.value)}>
                   <option value="">-- Medio de pago --</option>
-                  {mediosPago.map((m) => <option key={m.id} value={m.id}>{m.tipo}</option>)}
+                  {/* Mercado Pago no va acá: se cobra con el QR y lo confirma el webhook */}
+                  {mediosPago
+                    .filter((m) => m.tipo !== 'MercadoPago')
+                    .map((m) => <option key={m.id} value={m.id}>{m.tipo}</option>)}
                 </select>
                 <button className="btn btn-primary" onClick={cobrar} disabled={procesando}>Cobrar</button>
               </div>
             </div>
-
+            {/* Mercado Pago: genera el QR y espera a que el webhook confirme el pago */}
+            <div className="form-group">
+              <button className="btn btn-primary" onClick={() => setMostrarQr(true)} disabled={procesando}>
+                Cobrar con Mercado Pago (QR)
+              </button>
+            </div>
+            {/* cancelar */}
             <div className="modal-actions">
               <button className="btn btn-danger" onClick={cancelarComanda} disabled={procesando}>Cancelar comanda</button>
             </div>
@@ -237,6 +249,20 @@ const DetalleComandaModal = ({ idComanda, onCerrar, onCambio }) => {
         )}
       </div>
     </Modal>
+
+      {/* Va afuera del Modal: el .modal tiene transform y recortaría un overlay fixed adentro */}
+      {mostrarQr && (
+        <PagoQrModal
+          idComanda={idComanda}
+          onCerrar={() => setMostrarQr(false)}
+          onPagada={async () => {
+            setMostrarQr(false);
+            toast.success(`Pago recibido. La mesa ${comanda.id_mesa} quedó libre.`);
+            await recargarComanda();
+          }}
+        />
+      )}
+    </>
   );
 };
 

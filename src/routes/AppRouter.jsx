@@ -14,6 +14,7 @@ import MesasPage from '../pages/Mesas/MesasPage';
 import ReservasPage from '../pages/Reservas/ReservasPage';
 import CategoriasPage from '../pages/Categorias/CategoriasPage';
 import MediosPagoPage from '../pages/MediosPago/MediosPagoPage';
+import ResultadoPagoPage from '../pages/Pago/ResultadoPagoPage';
 
 function LayoutPrivado() {
   return (
@@ -30,6 +31,8 @@ export default function AppRouter() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      {/* Pública: acá vuelve el cliente desde Mercado Pago (no tiene login) */}
+      <Route path="/pago/resultado" element={<ResultadoPagoPage />} />
 
       <Route element={<LayoutPrivado />}>
         <Route element={<RutaProtegida roles={['Administrador']} />}>
