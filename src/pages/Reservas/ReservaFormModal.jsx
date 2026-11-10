@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import Modal from '../../components/common/Modal';
 import { createReserva, updateReserva } from '../../services/reservas.service';
 import { getMesasDisponibles } from '../../services/mesas.service';
-import { aInputFechaHora, mensajeDeError } from '../../utils/formato';
+import { mensajeDeError } from '../../utils/formato';
+import { fechaReservaAUTC, fechaReservaParaInput } from '../../utils/fechaReserva';
 import { Reserva } from '../../models/modelos';
 
 /**
@@ -17,7 +18,7 @@ export default function ReservaFormModal({ reservaInicial, onGuardado, onCancela
   const [formData, setFormData] = useState({
     nombre_cliente: esEdicion ? reservaInicial.nombre_cliente : '',
     telefono_cliente: esEdicion ? reservaInicial.telefono_cliente : '',
-    fecha: esEdicion ? aInputFechaHora(reservaInicial.fecha) : '',
+    fecha: esEdicion ? fechaReservaParaInput(reservaInicial.fecha) : '',
     cantidad_personas: esEdicion ? reservaInicial.cantidad_personas : '',
     id_mesa: esEdicion ? reservaInicial.id_mesa : ''
   });
@@ -27,10 +28,22 @@ export default function ReservaFormModal({ reservaInicial, onGuardado, onCancela
   );
   const [cargandoMesas, setCargandoMesas] = useState(false);
   const [cargando, setCargando] = useState(false);
+  const busquedaActual = useRef(0);
+
+  const instanteReserva = () => esEdicion && formData.fecha === fechaReservaParaInput(reservaInicial.fecha)
+    ? new Date(reservaInicial.fecha).toISOString()
+    : fechaReservaAUTC(formData.fecha);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'fecha' || name === 'cantidad_personas') {
+      busquedaActual.current += 1;
+      setMesasDisponibles([]);
+      setCargandoMesas(false);
+      setFormData(prev => ({ ...prev, [name]: value, id_mesa: '' }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const buscarMesasLibres = async () => {
@@ -40,9 +53,11 @@ export default function ReservaFormModal({ reservaInicial, onGuardado, onCancela
     }
 
     setCargandoMesas(true);
+    const busqueda = ++busquedaActual.current;
     try {
-      const fechaISO = new Date(formData.fecha).toISOString();
-      const res = await getMesasDisponibles(fechaISO, formData.cantidad_personas);
+      const fechaISO = instanteReserva();
+      const res = await getMesasDisponibles(fechaISO, formData.cantidad_personas, reservaInicial?.id);
+      if (busqueda !== busquedaActual.current) return;
       setMesasDisponibles(res.data);
       setFormData(prev => ({ ...prev, id_mesa: '' }));
       if (res.data.length === 0) {
@@ -51,9 +66,9 @@ export default function ReservaFormModal({ reservaInicial, onGuardado, onCancela
         toast.success(`Se encontraron ${res.data.length} mesas disponibles`);
       }
     } catch (error) {
-      toast.error(mensajeDeError(error, 'Error al buscar mesas libres'));
+      if (busqueda === busquedaActual.current) toast.error(mensajeDeError(error, error.message || 'Error al buscar mesas libres'));
     } finally {
-      setCargandoMesas(false);
+      if (busqueda === busquedaActual.current) setCargandoMesas(false);
     }
   };
 
@@ -66,8 +81,7 @@ export default function ReservaFormModal({ reservaInicial, onGuardado, onCancela
 
     setCargando(true);
     try {
-      // El modelo formatea los datos antes de enviarlos (fecha ISO y números enteros)
-      const dataAEnviar = new Reserva(formData).toApi();
+      const dataAEnviar = new Reserva({ ...formData, fecha: instanteReserva() }).toApi();
 
       if (esEdicion) {
         await updateReserva(reservaInicial.id, dataAEnviar);
@@ -78,7 +92,7 @@ export default function ReservaFormModal({ reservaInicial, onGuardado, onCancela
       }
       onGuardado();
     } catch (error) {
-      toast.error(mensajeDeError(error, 'Error al guardar la reserva'));
+      toast.error(mensajeDeError(error, error.message || 'Error al guardar la reserva'));
     } finally {
       setCargando(false);
     }

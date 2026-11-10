@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { CalendarDays, ChefHat, CircleDollarSign, LayoutList, RefreshCw, Utensils } from 'lucide-react';
 // Servicios que encapsulan las llamadas HTTP de este módulo.
 import { getDashboardStats, getMesasActivas } from '../../services/dashboard.service';
+import { formatearFechaReserva } from '../../utils/fechaReserva';
 
 // Formateadores creados una sola vez fuera del componente para no reconstruirlos en cada render.
 const moneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
@@ -102,7 +103,7 @@ export default function HomePage() {
             {/* Se muestra la única mesa asignada a la reserva según el nuevo modelo de DB. */}
             {reservas.length ? (
               <div className="overflow-x-auto"><table className="data-table compact-table"><thead><tr><th>Cliente</th><th>Fecha</th><th>Mesa</th></tr></thead><tbody>
-                {reservas.map((reserva) => <tr key={reserva.id}><td><strong>{reserva.nombre_cliente}</strong></td><td>{fechaHora.format(new Date(reserva.fecha))}</td><td>{reserva.mesa ? reserva.mesa.id : 'A asignar'}</td></tr>)}
+                {reservas.map((reserva) => <tr key={reserva.id}><td><strong>{reserva.nombre_cliente}</strong></td><td>{formatearFechaReserva(reserva.fecha)}</td><td>{reserva.mesa ? reserva.mesa.id : 'A asignar'}</td></tr>)}
               </tbody></table></div>
             ) : <p className="px-4 py-8 text-center text-muted">No hay reservas confirmadas próximas.</p>}
           </article>

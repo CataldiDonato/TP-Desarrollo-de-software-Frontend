@@ -3,6 +3,7 @@ import Modal from '../../components/common/Modal';
 import { getMesa } from '../../services/mesas.service';
 import { formatearFecha, mensajeDeError } from '../../utils/formato';
 import { ESTADO_DETALLE_LEGIBLE } from '../../models/modelos';
+import { formatearFechaReserva } from '../../utils/fechaReserva';
 
 /**
  * Detalle de una mesa (lo pide al backend): estado, comanda abierta con sus productos
@@ -62,7 +63,7 @@ export default function MesaDetalleModal({ idMesa, onCerrar }) {
               <ul className="flex flex-col gap-2">
                 {mesa.proximasReservas.map((reserva) => (
                   <li key={reserva.id}>
-                    {formatearFecha(reserva.fecha)} · {reserva.nombre_cliente} ({reserva.cantidad_personas} personas)
+                    {formatearFechaReserva(reserva.fecha)} · {reserva.nombre_cliente} ({reserva.cantidad_personas} personas)
                   </li>
                 ))}
               </ul>

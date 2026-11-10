@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Ban, CheckCircle2, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getReservas, deleteReserva, updateEstadoReserva } from '../../services/reservas.service';
-import { formatearFecha, mensajeDeError } from '../../utils/formato';
+import { mensajeDeError } from '../../utils/formato';
+import { formatearFechaReserva } from '../../utils/fechaReserva';
 import ReservaFormModal from './ReservaFormModal';
 import CancelarReservaModal from './CancelarReservaModal';
 
@@ -127,7 +128,7 @@ export default function ReservasPage() {
               ) : reservas.map(r => (
                 <tr key={r.id}>
                   <td><strong>{r.nombre_cliente}</strong></td>
-                  <td>{formatearFecha(r.fecha)}</td>
+                  <td>{formatearFechaReserva(r.fecha)}</td>
                   <td>{r.telefono_cliente}</td>
                   <td>{r.cantidad_personas}</td>
                   <td>Mesa {r.id_mesa}</td>
