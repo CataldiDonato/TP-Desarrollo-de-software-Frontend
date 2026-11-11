@@ -46,7 +46,7 @@ export default function CocinaPage() {
     cargarPedidos(filtroEstado);
     const intervalo = setInterval(() => cargarPedidos(filtroEstado), INTERVALO_ACTUALIZACION);
     return () => clearInterval(intervalo);
-  }, [filtroEstado]);
+  }, [filtroEstado])
 
   async function cargarPedidos(estado) {
     // Se limpia un error anterior antes de realizar una nueva consulta.
