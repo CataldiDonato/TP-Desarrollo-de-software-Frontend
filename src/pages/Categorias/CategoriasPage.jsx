@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { deleteCategoria, getCategorias } from '../../services/categorias.service';
 import { mensajeDeError } from '../../utils/formato';
 import CategoriaFormModal from './CategoriaFormModal';
+import PageHeader from '../../components/common/PageHeader';
 
 export default function CategoriasPage() {
   const [categorias, setCategorias] = useState([]);
@@ -54,15 +55,11 @@ export default function CategoriasPage() {
 
   return (
     <section className="page-container">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Categorías</h1>
-          <p className="page-subtitle">Agrupan los productos del menú.</p>
-        </div>
+      <PageHeader titulo="Categorías" subtitulo="Agrupan los productos del menú.">
         <button className="btn btn-primary" type="button" onClick={abrirNueva}>
           <Plus size={18} /> Nueva categoría
         </button>
-      </div>
+      </PageHeader>
 
       {cargando && <p className="state-msg">Cargando categorías...</p>}
       {error && <p className="state-msg state-error">{error}</p>}

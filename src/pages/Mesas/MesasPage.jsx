@@ -7,6 +7,7 @@ import { ESTADOS_MESA } from '../../models/modelos';
 import { mensajeDeError } from '../../utils/formato';
 import MesaFormModal from './MesaFormModal';
 import MesaDetalleModal from './MesaDetalleModal';
+import PageHeader from '../../components/common/PageHeader';
 
 export default function MesasPage() {
   // El Mozo puede ver las mesas y su detalle; solo el Administrador las crea, edita o borra.
@@ -62,14 +63,13 @@ export default function MesasPage() {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Mesas</h1>
+      <PageHeader titulo="Mesas">
         {esAdmin && (
           <button className="btn btn-primary" onClick={abrirNueva}>
             <Plus size={18} /> Nueva mesa
           </button>
         )}
-      </div>
+      </PageHeader>
 
       {/* Filtro por disponibilidad */}
       <div className="filter-bar">

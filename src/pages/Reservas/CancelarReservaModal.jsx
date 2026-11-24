@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import Modal from '../../components/common/Modal';
+import FormModal from '../../components/common/FormModal';
 import { updateEstadoReserva } from '../../services/reservas.service';
 import { mensajeDeError } from '../../utils/formato';
 
@@ -31,19 +31,20 @@ export default function CancelarReservaModal({ reserva, onGuardado, onCancelar }
   }
 
   return (
-    <Modal titulo={`Cancelar reserva de ${reserva.nombre_cliente}`} onCerrar={onCancelar}>
-      <form className="modal-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="motivo">Motivo de la cancelación *</label>
-          <textarea id="motivo" rows={3} value={motivo} onChange={(event) => setMotivo(event.target.value)} autoFocus />
-        </div>
-        <div className="modal-actions">
-          <button type="button" className="btn btn-secondary" onClick={onCancelar} disabled={guardando}>Volver</button>
-          <button type="submit" className="btn btn-danger" disabled={guardando}>
-            {guardando ? 'Cancelando...' : 'Cancelar reserva'}
-          </button>
-        </div>
-      </form>
-    </Modal>
+    <FormModal
+      titulo={`Cancelar reserva de ${reserva.nombre_cliente}`}
+      onSubmit={handleSubmit}
+      onCancelar={onCancelar}
+      guardando={guardando}
+      textoGuardar="Cancelar reserva"
+      textoGuardando="Cancelando..."
+      textoCancelar="Volver"
+      peligro
+    >
+      <div className="form-group">
+        <label htmlFor="motivo">Motivo de la cancelación *</label>
+        <textarea id="motivo" rows={3} value={motivo} onChange={(event) => setMotivo(event.target.value)} autoFocus />
+      </div>
+    </FormModal>
   );
 }

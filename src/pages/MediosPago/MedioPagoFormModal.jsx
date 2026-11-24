@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import Modal from '../../components/common/Modal';
+import FormModal from '../../components/common/FormModal';
 import { createMedioPago, updateMedioPago } from '../../services/mediosPago.service';
 import { MedioPago, TIPOS_PAGO } from '../../models/modelos';
 import { mensajeDeError } from '../../utils/formato';
@@ -35,22 +35,18 @@ export default function MedioPagoFormModal({ medioInicial, onGuardado, onCancela
   }
 
   return (
-    <Modal titulo={esEdicion ? 'Editar medio de pago' : 'Nuevo medio de pago'} onCerrar={onCancelar}>
-      <form className="modal-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="medio-tipo">Tipo *</label>
-          <select id="medio-tipo" value={tipo} onChange={(event) => setTipo(event.target.value)}>
-            {TIPOS_PAGO.map((opcion) => <option key={opcion} value={opcion}>{opcion}</option>)}
-          </select>
-        </div>
-
-        <div className="modal-actions">
-          <button className="btn btn-secondary" type="button" onClick={onCancelar} disabled={guardando}>Cancelar</button>
-          <button className="btn btn-primary" type="submit" disabled={guardando}>
-            {guardando ? 'Guardando...' : 'Guardar'}
-          </button>
-        </div>
-      </form>
-    </Modal>
+    <FormModal
+      titulo={esEdicion ? 'Editar medio de pago' : 'Nuevo medio de pago'}
+      onSubmit={handleSubmit}
+      onCancelar={onCancelar}
+      guardando={guardando}
+    >
+      <div className="form-group">
+        <label htmlFor="medio-tipo">Tipo *</label>
+        <select id="medio-tipo" value={tipo} onChange={(event) => setTipo(event.target.value)}>
+          {TIPOS_PAGO.map((opcion) => <option key={opcion} value={opcion}>{opcion}</option>)}
+        </select>
+      </div>
+    </FormModal>
   );
 }

@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 // Servicios CRUD de usuarios: GET, DELETE; el modal utiliza POST y PUT.
 import { deleteUsuario, getUsuarios } from '../../services/usuarios.service';
 import UsuarioFormModal from './UsuarioFormModal';
+import PageHeader from '../../components/common/PageHeader';
 
 export default function UsuariosPage() {
   // Datos y estados necesarios para la tabla y el filtro de búsqueda.
@@ -73,15 +74,11 @@ export default function UsuariosPage() {
   return (
     <section className="page-container">
       {/* Encabezado y acción de alta de usuario. */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Usuarios</h1>
-          <p className="page-subtitle">Administrá los accesos y roles del equipo.</p>
-        </div>
+      <PageHeader titulo="Usuarios" subtitulo="Administrá los accesos y roles del equipo.">
         <button className="btn btn-primary" type="button" onClick={abrirNuevoUsuario}>
           <Plus size={18} /> Nuevo usuario
         </button>
-      </div>
+      </PageHeader>
 
       {/* Búsqueda por cualquiera de las columnas principales. */}
       <div className="search-bar">

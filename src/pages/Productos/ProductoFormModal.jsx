@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import Modal from '../../components/common/Modal'
+import FormModal from '../../components/common/FormModal'
 import { createProducto, updateProducto } from '../../services/productos.service'
 import { Producto, TIPOS_PRODUCTO } from '../../models/modelos'
 import { mensajeDeError } from '../../utils/formato'
@@ -81,94 +81,89 @@ export default function ProductoFormModal({ productoInicial, categorias, onGuard
 
   // ── Render ───────────────────────────────────────────────────────────
   return (
-    <Modal titulo={esEdicion ? 'Editar producto' : 'Nuevo producto'} onCerrar={onCancelar}>
-      <form className="modal-form" onSubmit={handleSubmit} noValidate>
+    <FormModal
+      titulo={esEdicion ? 'Editar producto' : 'Nuevo producto'}
+      onSubmit={handleSubmit}
+      onCancelar={onCancelar}
+      guardando={guardando}
+      textoGuardar={esEdicion ? 'Guardar cambios' : 'Crear producto'}
+      noValidate
+    >
 
-        {/* Campo: Nombre */}
-        <div className="form-group">
-          <label htmlFor="campo-nombre">Nombre *</label>
-          <input
-            id="campo-nombre"
-            name="nombre"
-            type="text"
-            placeholder="Ej: Milanesa napolitana"
-            value={form.nombre}
-            onChange={handleChange}
-            className={errores.nombre ? 'input-error' : ''}
-          />
-          {errores.nombre && <span className="error-msg">{errores.nombre}</span>}
-        </div>
+      {/* Campo: Nombre */}
+      <div className="form-group">
+        <label htmlFor="campo-nombre">Nombre *</label>
+        <input
+          id="campo-nombre"
+          name="nombre"
+          type="text"
+          placeholder="Ej: Milanesa napolitana"
+          value={form.nombre}
+          onChange={handleChange}
+          className={errores.nombre ? 'input-error' : ''}
+        />
+        {errores.nombre && <span className="error-msg">{errores.nombre}</span>}
+      </div>
 
-        {/* Campo: Descripción */}
-        <div className="form-group">
-          <label htmlFor="campo-descripcion">Descripción</label>
-          <textarea
-            id="campo-descripcion"
-            name="descripcion"
-            placeholder="Descripción del producto (opcional)"
-            value={form.descripcion}
-            onChange={handleChange}
-            rows={3}
-          />
-        </div>
+      {/* Campo: Descripción */}
+      <div className="form-group">
+        <label htmlFor="campo-descripcion">Descripción</label>
+        <textarea
+          id="campo-descripcion"
+          name="descripcion"
+          placeholder="Descripción del producto (opcional)"
+          value={form.descripcion}
+          onChange={handleChange}
+          rows={3}
+        />
+      </div>
 
-        {/* Campo: Tipo */}
-        <div className="form-group">
-          <label htmlFor="campo-tipo">Tipo *</label>
-          <select id="campo-tipo" name="tipo" value={form.tipo} onChange={handleChange}>
-            {TIPOS_PRODUCTO.map(tipo => <option key={tipo} value={tipo}>{tipo}</option>)}
-          </select>
-        </div>
+      {/* Campo: Tipo */}
+      <div className="form-group">
+        <label htmlFor="campo-tipo">Tipo *</label>
+        <select id="campo-tipo" name="tipo" value={form.tipo} onChange={handleChange}>
+          {TIPOS_PRODUCTO.map(tipo => <option key={tipo} value={tipo}>{tipo}</option>)}
+        </select>
+      </div>
 
-        {/* Campo: Categoría (desplegable con las categorías del backend) */}
-        <div className="form-group">
-          <label htmlFor="campo-categoria">Categoría *</label>
-          <select
-            id="campo-categoria"
-            name="id_categoria"
-            value={form.id_categoria}
-            onChange={handleChange}
-            className={errores.id_categoria ? 'input-error' : ''}
-          >
-            <option value="">-- Elegir categoría --</option>
-            {categorias.map(categoria => (
-              <option key={categoria.id} value={categoria.id}>{categoria.nombre}</option>
-            ))}
-          </select>
-          {errores.id_categoria && <span className="error-msg">{errores.id_categoria}</span>}
-          {categorias.length === 0 && (
-            <span className="error-msg">No hay categorías cargadas. Creá una en la pantalla Categorías.</span>
-          )}
-        </div>
+      {/* Campo: Categoría (desplegable con las categorías del backend) */}
+      <div className="form-group">
+        <label htmlFor="campo-categoria">Categoría *</label>
+        <select
+          id="campo-categoria"
+          name="id_categoria"
+          value={form.id_categoria}
+          onChange={handleChange}
+          className={errores.id_categoria ? 'input-error' : ''}
+        >
+          <option value="">-- Elegir categoría --</option>
+          {categorias.map(categoria => (
+            <option key={categoria.id} value={categoria.id}>{categoria.nombre}</option>
+          ))}
+        </select>
+        {errores.id_categoria && <span className="error-msg">{errores.id_categoria}</span>}
+        {categorias.length === 0 && (
+          <span className="error-msg">No hay categorías cargadas. Creá una en la pantalla Categorías.</span>
+        )}
+      </div>
 
-        {/* Campo: Precio */}
-        <div className="form-group">
-          <label htmlFor="campo-precio">Precio *</label>
-          <input
-            id="campo-precio"
-            name="precio"
-            type="number"
-            min="0.01"
-            step="0.01"
-            placeholder="0.00"
-            value={form.precio}
-            onChange={handleChange}
-            className={errores.precio ? 'input-error' : ''}
-          />
-          {errores.precio && <span className="error-msg">{errores.precio}</span>}
-          {esEdicion && <span className="form-hint">Si cambiás el precio, el anterior queda guardado en el historial.</span>}
-        </div>
-
-        {/* Botones */}
-        <div className="modal-actions">
-          <button type="button" className="btn btn-secondary" onClick={onCancelar} disabled={guardando}>
-            Cancelar
-          </button>
-          <button type="submit" className="btn btn-primary" disabled={guardando}>
-            {guardando ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Crear producto'}
-          </button>
-        </div>
-      </form>
-    </Modal>
+      {/* Campo: Precio */}
+      <div className="form-group">
+        <label htmlFor="campo-precio">Precio *</label>
+        <input
+          id="campo-precio"
+          name="precio"
+          type="number"
+          min="0.01"
+          step="0.01"
+          placeholder="0.00"
+          value={form.precio}
+          onChange={handleChange}
+          className={errores.precio ? 'input-error' : ''}
+        />
+        {errores.precio && <span className="error-msg">{errores.precio}</span>}
+        {esEdicion && <span className="form-hint">Si cambiás el precio, el anterior queda guardado en el historial.</span>}
+      </div>
+    </FormModal>
   )
 }

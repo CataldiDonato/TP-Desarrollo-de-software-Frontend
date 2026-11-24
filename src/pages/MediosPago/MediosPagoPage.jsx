@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { deleteMedioPago, getMediosPago } from '../../services/mediosPago.service';
 import { mensajeDeError } from '../../utils/formato';
 import MedioPagoFormModal from './MedioPagoFormModal';
+import PageHeader from '../../components/common/PageHeader';
 
 export default function MediosPagoPage() {
   const [medios, setMedios] = useState([]);
@@ -52,15 +53,11 @@ export default function MediosPagoPage() {
 
   return (
     <section className="page-container">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Medios de pago</h1>
-          <p className="page-subtitle">Formas de cobro que acepta el local.</p>
-        </div>
+      <PageHeader titulo="Medios de pago" subtitulo="Formas de cobro que acepta el local.">
         <button className="btn btn-primary" type="button" onClick={abrirNuevo}>
           <Plus size={18} /> Nuevo medio de pago
         </button>
-      </div>
+      </PageHeader>
 
       {cargando && <p className="state-msg">Cargando medios de pago...</p>}
       {error && <p className="state-msg state-error">{error}</p>}

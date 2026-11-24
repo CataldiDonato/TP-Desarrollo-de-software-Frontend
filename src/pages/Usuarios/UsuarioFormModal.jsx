@@ -1,7 +1,7 @@
 // useState controla los campos, errores de validación y el bloqueo del botón de guardado.
 import { useState } from 'react';
-// Icono del botón de cierre del modal.
-import { X } from 'lucide-react';
+// Modal genérico con formulario y botones Cancelar / Guardar.
+import FormModal from '../../components/common/FormModal';
 // Notificaciones de resultado de las operaciones POST y PUT.
 import toast from 'react-hot-toast';
 // Servicios correspondientes a alta y edición de usuarios.
@@ -85,72 +85,53 @@ export default function UsuarioFormModal({ usuarioInicial, onGuardado, onCancela
   }
 
   return (
-    // Click sobre el fondo oscuro cancela; el evento interno se detiene más abajo.
-    <div className="modal-overlay" onMouseDown={onCancelar}>
-      <section
-        className="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="usuario-modal-title"
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        {/* Cabecera: título dinámico y botón accesible para cerrar. */}
-        <header className="modal-header">
-          <h2 id="usuario-modal-title">{esEdicion ? 'Editar usuario' : 'Nuevo usuario'}</h2>
-          <button className="btn btn-icon" type="button" onClick={onCancelar} aria-label="Cerrar formulario">
-            <X size={20} />
-          </button>
-        </header>
+    // FormModal arma el modal, el <form> y los botones Cancelar / Guardar.
+    // noValidate permite mostrar los mensajes de validación propios, en español.
+    <FormModal
+      titulo={esEdicion ? 'Editar usuario' : 'Nuevo usuario'}
+      onSubmit={handleSubmit}
+      onCancelar={onCancelar}
+      guardando={guardando}
+      textoGuardar={esEdicion ? 'Guardar cambios' : 'Crear usuario'}
+      noValidate
+    >
+      {/* Nombre: requerido tanto en alta como en edición. */}
+      <div className="form-group">
+        <label htmlFor="usuario-nombre">Nombre *</label>
+        <input id="usuario-nombre" name="nombre" value={formulario.nombre} onChange={handleChange} autoFocus />
+        {errores.nombre && <span className="error-msg">{errores.nombre}</span>}
+      </div>
 
-        {/* noValidate permite mostrar los mensajes de validación propios, en español. */}
-        <form className="modal-form" onSubmit={handleSubmit} noValidate>
-          {/* Nombre: requerido tanto en alta como en edición. */}
-          <div className="form-group">
-            <label htmlFor="usuario-nombre">Nombre *</label>
-            <input id="usuario-nombre" name="nombre" value={formulario.nombre} onChange={handleChange} autoFocus />
-            {errores.nombre && <span className="error-msg">{errores.nombre}</span>}
-          </div>
+      {/* Email: requerido y validado antes del envío. */}
+      <div className="form-group">
+        <label htmlFor="usuario-email">Email *</label>
+        <input id="usuario-email" name="email" type="email" value={formulario.email} onChange={handleChange} />
+        {errores.email && <span className="error-msg">{errores.email}</span>}
+      </div>
 
-          {/* Email: requerido y validado antes del envío. */}
-          <div className="form-group">
-            <label htmlFor="usuario-email">Email *</label>
-            <input id="usuario-email" name="email" type="email" value={formulario.email} onChange={handleChange} />
-            {errores.email && <span className="error-msg">{errores.email}</span>}
-          </div>
+      {/* Rol: select limitado a los tres valores aceptados por la API. */}
+      <div className="form-group">
+        <label htmlFor="usuario-rol">Rol *</label>
+        <select id="usuario-rol" name="rol" value={formulario.rol} onChange={handleChange}>
+          {ROLES.map((rol) => <option key={rol} value={rol}>{rol}</option>)}
+        </select>
+      </div>
 
-          {/* Rol: select limitado a los tres valores aceptados por la API. */}
-          <div className="form-group">
-            <label htmlFor="usuario-rol">Rol *</label>
-            <select id="usuario-rol" name="rol" value={formulario.rol} onChange={handleChange}>
-              {ROLES.map((rol) => <option key={rol} value={rol}>{rol}</option>)}
-            </select>
-          </div>
-
-          {/* Contraseña: obligatoria al crear y opcional al editar. */}
-          <div className="form-group">
-            <label htmlFor="usuario-contrasenia">
-              Contraseña {esEdicion ? '(dejá vacío para conservar la actual)' : '*'}
-            </label>
-            <input
-              id="usuario-contrasenia"
-              name="contrasenia"
-              type="password"
-              value={formulario.contrasenia}
-              onChange={handleChange}
-              autoComplete="new-password"
-            />
-            {errores.contrasenia && <span className="error-msg">{errores.contrasenia}</span>}
-          </div>
-
-          {/* Acciones del formulario; se deshabilitan mientras la petición está pendiente. */}
-          <footer className="modal-actions">
-            <button className="btn btn-secondary" type="button" onClick={onCancelar} disabled={guardando}>Cancelar</button>
-            <button className="btn btn-primary" type="submit" disabled={guardando}>
-              {guardando ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Crear usuario'}
-            </button>
-          </footer>
-        </form>
-      </section>
-    </div>
+      {/* Contraseña: obligatoria al crear y opcional al editar. */}
+      <div className="form-group">
+        <label htmlFor="usuario-contrasenia">
+          Contraseña {esEdicion ? '(dejá vacío para conservar la actual)' : '*'}
+        </label>
+        <input
+          id="usuario-contrasenia"
+          name="contrasenia"
+          type="password"
+          value={formulario.contrasenia}
+          onChange={handleChange}
+          autoComplete="new-password"
+        />
+        {errores.contrasenia && <span className="error-msg">{errores.contrasenia}</span>}
+      </div>
+    </FormModal>
   );
 }

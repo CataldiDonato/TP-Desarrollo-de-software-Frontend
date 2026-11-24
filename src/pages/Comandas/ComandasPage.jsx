@@ -6,6 +6,7 @@ import { getComandas } from '../../services/comandas.service';
 import { ESTADOS_COMANDA } from '../../models/modelos';
 import { formatearFecha, formatearPrecio, mensajeDeError } from '../../utils/formato';
 import DetalleComandaModal from './DetalleComandaModal';
+import PageHeader from '../../components/common/PageHeader';
 
 const ComandasPage = () => {
   const navigate = useNavigate();
@@ -36,12 +37,11 @@ const ComandasPage = () => {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Comandas</h1>
+      <PageHeader titulo="Comandas">
         <button className="btn btn-primary" onClick={() => navigate('/comandas/nueva')}>
           <Plus size={18} /> Nueva comanda
         </button>
-      </div>
+      </PageHeader>
 
       <div className="filter-bar">
         <select className="filter-select" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>

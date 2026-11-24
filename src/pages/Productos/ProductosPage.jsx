@@ -7,6 +7,7 @@ import { Pencil, Trash2, Plus, Search, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
 import { formatearPrecio, mensajeDeError } from '../../utils/formato'
+import PageHeader from '../../components/common/PageHeader'
 
 export default function ProductosPage() {
   // Un Mozo puede ver el catálogo para armar pedidos, pero no crear/editar/eliminar productos.
@@ -81,14 +82,13 @@ export default function ProductosPage() {
   return (
     <div className="page-container">
       {/* Encabezado */}
-      <div className="page-header">
-        <h1 className="page-title">Productos</h1>
+      <PageHeader titulo="Productos">
         {!soloLectura && (
           <button className="btn btn-primary" onClick={handleNuevo}>
             <Plus size={18} /> Nuevo producto
           </button>
         )}
-      </div>
+      </PageHeader>
 
       {/* Filtros: buscador por nombre y categoría */}
       <div className="filter-bar">

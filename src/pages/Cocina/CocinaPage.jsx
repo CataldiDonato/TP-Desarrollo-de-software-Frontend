@@ -7,6 +7,7 @@ import { actualizarEstado, getPedidosActivos } from '../../services/cocina.servi
 // Datos del usuario logueado: solo un Cocinero puede cambiar el estado de los platos.
 import { useAuth } from '../../context/AuthContext';
 import DetalleComandaCocinaModal from './DetalleComandaCocinaModal';
+import PageHeader from '../../components/common/PageHeader';
 
 // Cada cuántos milisegundos se vuelven a pedir los pedidos (polling).
 const INTERVALO_ACTUALIZACION = 15000;
@@ -101,15 +102,11 @@ export default function CocinaPage() {
   return (
     <section className="page-container gap-5">
       {/* Título de la pantalla y recarga manual de los pedidos activos. */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Cocina KDS</h1>
-          <p className="page-subtitle">Gestioná los pedidos activos agrupados por comanda.</p>
-        </div>
+      <PageHeader titulo="Cocina KDS" subtitulo="Gestioná los pedidos activos agrupados por comanda.">
         <button className="btn btn-secondary" type="button" onClick={() => cargarPedidos(filtroEstado)} disabled={loading}>
           <RefreshCw size={18} /> Actualizar
         </button>
-      </div>
+      </PageHeader>
 
       {/* Filtro por estado: el backend devuelve solo los pedidos de ese estado. */}
       <div className="filter-bar">

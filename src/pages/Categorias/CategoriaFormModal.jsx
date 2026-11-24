@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import Modal from '../../components/common/Modal';
+import FormModal from '../../components/common/FormModal';
 import { createCategoria, updateCategoria } from '../../services/categorias.service';
 import { mensajeDeError } from '../../utils/formato';
 import { Categoria } from '../../models/modelos';
@@ -44,27 +44,25 @@ export default function CategoriaFormModal({ categoriaInicial, onGuardado, onCan
   }
 
   return (
-    <Modal titulo={esEdicion ? 'Editar categoría' : 'Nueva categoría'} onCerrar={onCancelar}>
-      <form className="modal-form" onSubmit={handleSubmit} noValidate>
-        <div className="form-group">
-          <label htmlFor="categoria-nombre">Nombre *</label>
-          <input
-            id="categoria-nombre"
-            value={nombre}
-            onChange={(event) => { setNombre(event.target.value); setError(''); }}
-            placeholder="Ej: Postres"
-            autoFocus
-          />
-          {error && <span className="error-msg">{error}</span>}
-        </div>
-
-        <div className="modal-actions">
-          <button className="btn btn-secondary" type="button" onClick={onCancelar} disabled={guardando}>Cancelar</button>
-          <button className="btn btn-primary" type="submit" disabled={guardando}>
-            {guardando ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Crear categoría'}
-          </button>
-        </div>
-      </form>
-    </Modal>
+    <FormModal
+      titulo={esEdicion ? 'Editar categoría' : 'Nueva categoría'}
+      onSubmit={handleSubmit}
+      onCancelar={onCancelar}
+      guardando={guardando}
+      textoGuardar={esEdicion ? 'Guardar cambios' : 'Crear categoría'}
+      noValidate
+    >
+      <div className="form-group">
+        <label htmlFor="categoria-nombre">Nombre *</label>
+        <input
+          id="categoria-nombre"
+          value={nombre}
+          onChange={(event) => { setNombre(event.target.value); setError(''); }}
+          placeholder="Ej: Postres"
+          autoFocus
+        />
+        {error && <span className="error-msg">{error}</span>}
+      </div>
+    </FormModal>
   );
 }

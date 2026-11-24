@@ -6,6 +6,7 @@ import { mensajeDeError } from '../../utils/formato';
 import { formatearFechaReserva } from '../../utils/fechaReserva';
 import ReservaFormModal from './ReservaFormModal';
 import CancelarReservaModal from './CancelarReservaModal';
+import PageHeader from '../../components/common/PageHeader';
 
 export default function ReservasPage() {
   const [reservas, setReservas] = useState([]);
@@ -79,12 +80,11 @@ export default function ReservasPage() {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Reservas</h1>
+      <PageHeader titulo="Reservas">
         <button className="btn btn-primary" onClick={abrirNueva}>
           <Plus size={18} /> Nueva reserva
         </button>
-      </div>
+      </PageHeader>
 
       {/* Filtros por cliente y por día */}
       <form className="filter-bar" onSubmit={handleBuscar}>

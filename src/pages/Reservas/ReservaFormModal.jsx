@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import Modal from '../../components/common/Modal';
+import FormModal from '../../components/common/FormModal';
 import { createReserva, updateReserva } from '../../services/reservas.service';
 import { getMesasDisponibles } from '../../services/mesas.service';
 import { mensajeDeError } from '../../utils/formato';
@@ -99,49 +99,46 @@ export default function ReservaFormModal({ reservaInicial, onGuardado, onCancela
   };
 
   return (
-    <Modal titulo={esEdicion ? 'Editar reserva' : 'Nueva reserva'} onCerrar={onCancelar}>
-      <form className="modal-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="reserva-nombre">Nombre del cliente *</label>
-          <input id="reserva-nombre" name="nombre_cliente" value={formData.nombre_cliente} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-          <label htmlFor="reserva-telefono">Teléfono *</label>
-          <input id="reserva-telefono" name="telefono_cliente" type="tel" value={formData.telefono_cliente} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-          <label htmlFor="reserva-fecha">Fecha y hora *</label>
-          <input id="reserva-fecha" type="datetime-local" name="fecha" value={formData.fecha} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-          <label htmlFor="reserva-personas">Cantidad de personas *</label>
-          <input id="reserva-personas" type="number" name="cantidad_personas" min="1" value={formData.cantidad_personas} onChange={handleChange} required />
-        </div>
+    <FormModal
+      titulo={esEdicion ? 'Editar reserva' : 'Nueva reserva'}
+      onSubmit={handleSubmit}
+      onCancelar={onCancelar}
+      guardando={cargando}
+      textoGuardar={esEdicion ? 'Guardar cambios' : 'Confirmar reserva'}
+    >
+      <div className="form-group">
+        <label htmlFor="reserva-nombre">Nombre del cliente *</label>
+        <input id="reserva-nombre" name="nombre_cliente" value={formData.nombre_cliente} onChange={handleChange} required />
+      </div>
+      <div className="form-group">
+        <label htmlFor="reserva-telefono">Teléfono *</label>
+        <input id="reserva-telefono" name="telefono_cliente" type="tel" value={formData.telefono_cliente} onChange={handleChange} required />
+      </div>
+      <div className="form-group">
+        <label htmlFor="reserva-fecha">Fecha y hora *</label>
+        <input id="reserva-fecha" type="datetime-local" name="fecha" value={formData.fecha} onChange={handleChange} required />
+      </div>
+      <div className="form-group">
+        <label htmlFor="reserva-personas">Cantidad de personas *</label>
+        <input id="reserva-personas" type="number" name="cantidad_personas" min="1" value={formData.cantidad_personas} onChange={handleChange} required />
+      </div>
 
-        <div className="form-group">
-          <label htmlFor="reserva-mesa">Mesa *</label>
-          <div className="input-con-boton">
-            <select id="reserva-mesa" name="id_mesa" value={formData.id_mesa} onChange={handleChange} required disabled={mesasDisponibles.length === 0}>
-              <option value="">-- Seleccionar mesa --</option>
-              {mesasDisponibles.map(mesa => (
-                <option key={mesa.id} value={mesa.id}>
-                  Mesa {mesa.id} {mesa.actual ? '(la actual)' : `(capacidad: ${mesa.capacidad})`}
-                </option>
-              ))}
-            </select>
-            <button type="button" className="btn btn-secondary" onClick={buscarMesasLibres} disabled={cargandoMesas}>
-              {cargandoMesas ? 'Buscando...' : 'Buscar mesas libres'}
-            </button>
-          </div>
-        </div>
-
-        <div className="modal-actions">
-          <button type="button" className="btn btn-secondary" onClick={onCancelar}>Cancelar</button>
-          <button type="submit" className="btn btn-primary" disabled={cargando}>
-            {cargando ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Confirmar reserva'}
+      <div className="form-group">
+        <label htmlFor="reserva-mesa">Mesa *</label>
+        <div className="input-con-boton">
+          <select id="reserva-mesa" name="id_mesa" value={formData.id_mesa} onChange={handleChange} required disabled={mesasDisponibles.length === 0}>
+            <option value="">-- Seleccionar mesa --</option>
+            {mesasDisponibles.map(mesa => (
+              <option key={mesa.id} value={mesa.id}>
+                Mesa {mesa.id} {mesa.actual ? '(la actual)' : `(capacidad: ${mesa.capacidad})`}
+              </option>
+            ))}
+          </select>
+          <button type="button" className="btn btn-secondary" onClick={buscarMesasLibres} disabled={cargandoMesas}>
+            {cargandoMesas ? 'Buscando...' : 'Buscar mesas libres'}
           </button>
         </div>
-      </form>
-    </Modal>
+      </div>
+    </FormModal>
   );
 }

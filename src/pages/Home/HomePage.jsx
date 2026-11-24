@@ -5,6 +5,7 @@ import { CalendarDays, ChefHat, CircleDollarSign, LayoutList, RefreshCw, Utensil
 // Servicios que encapsulan las llamadas HTTP de este módulo.
 import { getDashboardStats, getMesasActivas } from '../../services/dashboard.service';
 import { formatearFechaReserva } from '../../utils/fechaReserva';
+import PageHeader from '../../components/common/PageHeader';
 
 // Formateadores creados una sola vez fuera del componente para no reconstruirlos en cada render.
 const moneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
@@ -57,15 +58,11 @@ export default function HomePage() {
     // Contenedor general que hereda los estilos compartidos de todas las páginas.
     <section className="page-container">
       {/* Encabezado y acción manual para volver a consultar los datos. */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Resumen del restaurante</h1>
-          <p className="page-subtitle">Información operativa actualizada al momento.</p>
-        </div>
+      <PageHeader titulo="Resumen del restaurante" subtitulo="Información operativa actualizada al momento.">
         <button className="btn btn-secondary" type="button" onClick={cargarDashboard} disabled={cargando}>
           <RefreshCw size={18} /> Actualizar
         </button>
-      </div>
+      </PageHeader>
 
       {/* Estados transitorios: no se muestran las tablas mientras carga o hay un error. */}
       {cargando && <p className="state-msg">Cargando indicadores...</p>}
