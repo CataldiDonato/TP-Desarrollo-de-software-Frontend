@@ -1,0 +1,168 @@
+/* ============================================================
+   ESTILOS DE RESTOFLOW — TAILWIND CSS v4
+   Tailwind es mobile-first: una clase sin prefijo aplica a todas
+   las pantallas y los prefijos sm: / md: / lg: la cambian desde
+   ese ancho para arriba.
+   Breakpoints (los de Tailwind): SM 640px · MD 768px · LG 1024px
+
+   Cómo está organizado (siguiendo la guía de Tailwind):
+   - @theme: los colores y sombras del diseño. Cada token genera
+     sus utilidades (ej: --color-surface → bg-surface, border-surface).
+   - @layer base: estilos de las etiquetas HTML.
+   - @layer components: piezas que se repiten en muchas pantallas
+     (botones, tablas, formularios, modales, etiquetas). Se arman con
+     @apply para no copiar la misma lista de utilidades en cada JSX.
+   - El layout propio de cada pantalla se escribe con utilidades
+     directamente en el JSX.
+   ============================================================ */
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', 'Segoe UI', sans-serif;
+
+  --color-page: #0f1117;
+  --color-surface: #1a1d27;
+  --color-surface-2: #242838;
+  --color-border: #2e3347;
+  --color-primary: #6c63ff;
+  --color-primary-h: #8b84ff;
+  --color-danger: #ff4d6d;
+  --color-danger-h: #ff6b85;
+  --color-success: #2dd4bf;
+  --color-warning: #fbbf24;
+  --color-info: #93c5fd;
+  --color-violet: #c4b5fd;
+  --color-orange: #fdba74;
+  --color-fg: #e2e8f0;
+  --color-muted: #8892a4;
+
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+
+  --animate-fade-in: fade-in 0.15s ease;
+  --animate-slide-up: slide-up 0.2s ease;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slide-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+@layer base {
+  body {
+    @apply min-h-screen bg-page font-sans text-fg;
+  }
+
+  /* Preflight de Tailwind deja los títulos sin tamaño: se les devuelve una jerarquía */
+  h1 { @apply text-2xl font-bold; }
+  h2 { @apply text-xl font-bold; }
+  h3 { @apply text-lg font-bold; }
+}
+
+/* ============================================================
+   COMPONENTES REUTILIZABLES
+   ============================================================ */
+@layer components {
+  /* ---------- Página ---------- */
+  .page-container { @apply flex flex-col gap-6; }
+  .page-header { @apply flex flex-wrap items-center justify-between gap-4; }
+  .page-title { @apply text-[1.4rem] sm:text-[1.75rem]; }
+  .page-subtitle { @apply mt-1.5 text-muted; }
+
+  /* Tarjeta base: la usan paneles, métricas, KDS y login */
+  .card { @apply rounded-[10px] border border-border bg-surface shadow-card; }
+
+  /* ---------- Mensajes de estado ---------- */
+  .state-msg { @apply italic text-muted; }
+  .state-error { @apply font-medium not-italic text-danger; }
+  .state-success { @apply font-medium not-italic text-success; }
+
+  /* ---------- Botones ---------- */
+  .btn {
+    @apply inline-flex cursor-pointer items-center gap-1.5 rounded-[10px] border-0 px-5 py-2 text-sm font-semibold
+      transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 enabled:active:scale-[0.97];
+  }
+  .btn-primary { @apply bg-primary text-white enabled:hover:bg-primary-h; }
+  .btn-secondary { @apply border border-border bg-surface-2 text-fg enabled:hover:bg-border; }
+  .btn-danger { @apply bg-danger text-white enabled:hover:bg-danger-h; }
+  .btn-block { @apply w-full justify-center; }
+  .btn-icon { @apply rounded-md bg-transparent p-1.5 text-fg; }
+  .btn-edit { @apply hover:bg-primary/15 hover:text-primary; }
+  .btn-delete { @apply hover:bg-danger/15 hover:text-danger; }
+
+  /* ---------- Tablas ---------- */
+  .table-wrapper { @apply overflow-x-auto rounded-[10px] border border-border shadow-card; }
+  .data-table { @apply w-full border-collapse bg-surface text-[0.95rem]; }
+  .data-table thead tr { @apply bg-surface-2; }
+  .data-table th {
+    @apply border-b border-border px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted;
+  }
+  .data-table td { @apply border-b border-border px-5 py-3.5 align-middle; }
+  .data-table tbody tr:last-child td { @apply border-b-0; }
+  .data-table tbody tr:hover { @apply bg-surface-2; }
+  /* Variante más apretada para tablas dentro de paneles y modales */
+  .compact-table th, .compact-table td { @apply px-3.5 py-3; }
+  .table-empty { @apply p-8! text-center italic text-muted; }
+  .table-empty svg { @apply mr-2 inline align-middle; }
+  /* Sin flex: un <td> con flex deja de comportarse como celda y desalinea los bordes */
+  .table-actions { @apply whitespace-nowrap; }
+  .table-actions .btn + .btn { @apply ml-1.5; }
+
+  /* ---------- Buscador y filtros de listados ---------- */
+  .filter-bar { @apply flex flex-wrap items-center gap-3; }
+  .filter-bar .search-bar { @apply flex-[1_1_220px]; }
+  .filter-select, .filter-input, .search-input {
+    @apply rounded-[10px] border border-border bg-surface px-3.5 py-2.5 text-[0.95rem] text-fg
+      transition-colors placeholder:text-muted focus:border-primary focus:outline-none;
+  }
+  .search-bar { @apply relative max-w-[400px]; }
+  .search-icon { @apply pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted; }
+  .search-input { @apply w-full pl-10; }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay {
+    @apply fixed inset-0 z-200 flex animate-fade-in items-center justify-center bg-black/65 p-4 backdrop-blur-sm;
+  }
+  .modal {
+    @apply max-h-[90vh] w-full max-w-[560px] animate-slide-up overflow-y-auto rounded-[15px] border border-border
+      bg-surface shadow-card;
+  }
+  .modal-header { @apply flex items-center justify-between border-b border-border px-6 py-5; }
+  .modal-header h2 { @apply text-lg; }
+  /* Contenido de los modales que no son formularios (detalles) */
+  .modal-body { @apply flex flex-col gap-3.5 px-6 py-5; }
+  .modal-body h3 { @apply mt-2 text-[0.95rem]; }
+  .modal-form { @apply flex flex-col gap-4 p-6; }
+  .modal-actions { @apply mt-2 flex justify-end gap-3 border-t border-border pt-2; }
+
+  /* ---------- Formularios ---------- */
+  .form-group { @apply flex flex-col gap-1.5; }
+  .form-group label { @apply text-sm font-semibold text-muted; }
+  .form-group input, .form-group textarea, .form-group select {
+    @apply resize-y rounded-[10px] border border-border bg-surface-2 px-3.5 py-2.5 text-[0.95rem] text-fg
+      transition-colors focus:border-primary focus:outline-none;
+  }
+  .form-group .input-error { @apply border-danger; }
+  .error-msg { @apply text-xs text-danger; }
+  .form-hint { @apply text-xs text-muted; }
+  /* Un campo con un botón al lado (ej: elegir mesa + "Buscar mesas libres") */
+  .input-con-boton { @apply flex flex-wrap gap-2; }
+  .input-con-boton select { @apply flex-[1_1_180px]; }
+
+  /* ---------- Etiquetas de estado (mesas, reservas, comandas, cocina, roles) ---------- */
+  .badge { @apply inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap; }
+  .badge-ok, .estado-libre, .estado-confirmada, .estado-pagada, .estado-finalizada { @apply bg-success/15 text-success; }
+  .estado-ocupada, .estado-cancelada { @apply bg-danger/15 text-danger; }
+  .estado-reservada, .estado-abierta, .estado-pendiente { @apply bg-warning/15 text-warning; }
+  .estado-en_preparacion { @apply bg-info/15 text-info; }
+  .role-admin { @apply bg-violet/15 text-violet; }
+  .role-cook { @apply bg-orange/15 text-orange; }
+  .role-waiter { @apply bg-info/15 text-info; }
+}
